@@ -245,15 +245,6 @@ void print_board(Piece mat[8][8]){
 int main()
 {
 
-    Piece king;
-    king.name = "king";
-    king.moveset = moveset(0,3);
-
-    //printf("%s", king.name);
-
-    player_1[0] = king;
-    //printf("%s\n", player_1[0].name);
-    //print_moveset(player_1[0].moveset);
     init_board();
     print_board(board.grid);
     
