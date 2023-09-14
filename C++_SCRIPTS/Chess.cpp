@@ -207,6 +207,8 @@ void init_board(){
 
             board.grid[col][row].name = nameset(row, col);
             board.grid[col][row].moveset = moveset(row, col);
+            board.grid[col][row].row = row;
+            board.grid[col][row].col = col;
 
         }
 
@@ -214,8 +216,42 @@ void init_board(){
 
 }
 
-void make_a_move(int player, Piece piece){
+void make_a_move(int row, int col, Piece piece){
 
+    if(piece.row > row && piece.col > col){
+
+        if(piece.moveset[piece.row - row][piece.col - col]){
+            board.grid[col][row] = piece;
+            board.grid[piece.row][piece.col].name = " void ";
+        }else{
+            cout << "\nMOVE NOT VALID\n";
+        }
+    
+    }else{
+
+        if(piece.row > row){
+
+            if(piece.moveset[piece.row - row][col - piece.col]){
+                board.grid[col][row] = piece;
+                board.grid[piece.row][piece.col].name = " void ";
+            }else{
+                cout << "\nMOVE NOT VALID\n";
+            }
+
+        }else{
+
+            if(piece.moveset[row - piece.row][piece.col - col]){
+                board.grid[col][row] = piece;
+                board.grid[piece.row][piece.col].name = " void ";
+            }else{
+                cout << "\nMOVE NOT VALID\n";
+            }
+
+        }
+
+    }
+    
+    
 }
 
 void print_moveset(bool** mat){
@@ -233,7 +269,7 @@ void print_board(Piece mat[8][8]){
 
     for(int col = 0; col < 8; col++){
         for(int row = 0; row < 8; row++){
-            cout << " " << mat[row][col].name;
+            cout << mat[row][col].name;
             if(row == 7){
                 printf("\n");
             }
@@ -246,6 +282,9 @@ int main()
 {
 
     init_board();
+    print_board(board.grid);
+    make_a_move(2,2,board.grid[1][1]);
+    cout << "\n";
     print_board(board.grid);
     
     return 0;
