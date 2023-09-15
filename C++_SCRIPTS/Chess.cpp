@@ -1,9 +1,14 @@
 #include <iostream>
+#include <windows.h>
+#include <color.hpp>
 #define INVALID -1;
 using namespace std;
 
+enum player_color {white = 0, black = 1, red = 2};
+
 class Piece{
     public:
+        player_color color;
         string name;
         int row;
         int col;
@@ -209,6 +214,15 @@ void init_board(){
             board.grid[col][row].moveset = moveset(row, col);
             board.grid[col][row].row = row;
             board.grid[col][row].col = col;
+            if(row < 2){
+                board.grid[col][row].color = black;
+            }
+            if(row > 5){
+                board.grid[col][row].color = white;
+            }
+            if(row > 1 && row < 6){
+                board.grid[col][row].color = red;
+            }
 
         }
 
@@ -221,8 +235,9 @@ void make_a_move(int row, int col, Piece piece){
     if(piece.row > row && piece.col > col){
 
         if(piece.moveset[piece.row - row][piece.col - col]){
-            board.grid[col][row] = piece;
+            board.grid[row][col] = piece;
             board.grid[piece.row][piece.col].name = " void ";
+            board.grid[piece.row][piece.col].color = red;
         }else{
             cout << "\nMOVE NOT VALID\n";
         }
@@ -232,8 +247,9 @@ void make_a_move(int row, int col, Piece piece){
         if(piece.row > row){
 
             if(piece.moveset[piece.row - row][col - piece.col]){
-                board.grid[col][row] = piece;
+                board.grid[row][col] = piece;
                 board.grid[piece.row][piece.col].name = " void ";
+                board.grid[piece.row][piece.col].color = red;
             }else{
                 cout << "\nMOVE NOT VALID\n";
             }
@@ -241,8 +257,9 @@ void make_a_move(int row, int col, Piece piece){
         }else{
 
             if(piece.moveset[row - piece.row][piece.col - col]){
-                board.grid[col][row] = piece;
+                board.grid[row][col] = piece;
                 board.grid[piece.row][piece.col].name = " void ";
+                board.grid[piece.row][piece.col].color = red;
             }else{
                 cout << "\nMOVE NOT VALID\n";
             }
@@ -269,7 +286,43 @@ void print_board(Piece mat[8][8]){
 
     for(int col = 0; col < 8; col++){
         for(int row = 0; row < 8; row++){
-            cout << mat[row][col].name;
+
+            /**
+            if(col < 2){
+                auto const& colorized_text = color::rize( mat[row][col].name, "Black", "Blue" );
+                cout << colorized_text;
+                mat[row][col].color = black;
+            }
+            if(col > 5){
+                auto const& colorized_text = color::rize( mat[row][col].name, "White", "Blue" );
+                cout << colorized_text;
+                mat[row][col].color = white;
+            }
+            if(col > 1 && col < 6){
+                auto const& colorized_text = color::rize( mat[row][col].name, "Red", "Blue" );
+                cout << colorized_text;
+            }
+            */
+
+            switch (mat[row][col].color)
+            {
+            case black:
+                cout << color::rize( mat[row][col].name, "Black", "Blue" );
+                break;
+            
+            case white:
+                cout << color::rize( mat[row][col].name, "White", "Blue" );
+                break;
+
+            case red:
+                cout << color::rize( mat[row][col].name, "Red", "Blue" );
+                break;
+
+            default:
+                break;
+            }
+
+            //cout << mat[row][col].name;
             if(row == 7){
                 printf("\n");
             }
@@ -278,14 +331,23 @@ void print_board(Piece mat[8][8]){
 
 }
 
+void game_loop(){
+
+}
+
 int main()
 {
-
+    /**
+    auto const& colorized_text = color::rize( "I am a banana!", "Black", "Blue" );
+    cout << colorized_text << std::endl;
+    */
+    
     init_board();
     print_board(board.grid);
     make_a_move(2,2,board.grid[1][1]);
     cout << "\n";
     print_board(board.grid);
+    
     
     return 0;
 
