@@ -127,9 +127,9 @@ bool** moveset(int row, int col){
             for(int col = 0; col < 17; col++){
                 for(int row = 0; row < 17; row++){
                     if((row == 7 || row == 6) && col == 8){
-                        moveset[col][row] = true;
+                        moveset[row][col] = true;
                     }else{
-                        moveset[col][row] = false;
+                        moveset[row][col] = false;
                     }
                 }
             } 
@@ -138,7 +138,7 @@ bool** moveset(int row, int col){
 
             for(int col = 0; col < 17; col++){
                 for(int row = 0; row < 17; row++){
-                    moveset[col][row] = false;
+                    moveset[row][col] = false;
                 }
             }
             return moveset; 
@@ -206,22 +206,22 @@ string nameset(int row, int col){
 
 void init_board(){
 
-    for(int col = 0; col < 8; col++){
+    for(int row = 0; row < 8; row++){
 
-        for(int row = 0; row < 8; row++){
+        for(int col = 0; col < 8; col++){
 
-            board.grid[col][row].name = nameset(row, col);
-            board.grid[col][row].moveset = moveset(row, col);
-            board.grid[col][row].row = row;
-            board.grid[col][row].col = col;
+            board.grid[row][col].name = nameset(row, col);
+            board.grid[row][col].moveset = moveset(row, col);
+            board.grid[row][col].row = row;
+            board.grid[row][col].col = col;
             if(row < 2){
-                board.grid[col][row].color = black;
+                board.grid[row][col].color = black;
             }
             if(row > 5){
-                board.grid[col][row].color = white;
+                board.grid[row][col].color = white;
             }
             if(row > 1 && row < 6){
-                board.grid[col][row].color = red;
+                board.grid[row][col].color = red;
             }
 
         }
@@ -234,7 +234,7 @@ void make_a_move(int row, int col, Piece piece){
 
     if(piece.row > row && piece.col > col){
 
-        if(piece.moveset[piece.row - row][piece.col - col]){
+        if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
             board.grid[row][col] = piece;
             board.grid[piece.row][piece.col].name = " void ";
             board.grid[piece.row][piece.col].color = red;
@@ -246,7 +246,7 @@ void make_a_move(int row, int col, Piece piece){
 
         if(piece.row > row){
 
-            if(piece.moveset[piece.row - row][col - piece.col]){
+            if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
                 board.grid[row][col] = piece;
                 board.grid[piece.row][piece.col].name = " void ";
                 board.grid[piece.row][piece.col].color = red;
@@ -256,14 +256,28 @@ void make_a_move(int row, int col, Piece piece){
 
         }else{
 
-            if(piece.moveset[row - piece.row][piece.col - col]){
-                board.grid[row][col] = piece;
-                board.grid[piece.row][piece.col].name = " void ";
-                board.grid[piece.row][piece.col].color = red;
-            }else{
-                cout << "\nMOVE NOT VALID\n";
-            }
+            if(piece.col > col){
 
+                if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
+                    board.grid[row][col] = piece;
+                    board.grid[piece.row][piece.col].name = " void ";
+                    board.grid[piece.row][piece.col].color = red;
+                }else{
+                    cout << "\nMOVE NOT VALID\n";
+                }
+
+            }else{
+
+                if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
+                    board.grid[row][col] = piece;
+                    board.grid[piece.row][piece.col].name = " void ";
+                    board.grid[piece.row][piece.col].color = red;
+                }else{
+                    cout << "\nMOVE NOT VALID\n";
+                }
+
+            }
+            
         }
 
     }
@@ -272,10 +286,11 @@ void make_a_move(int row, int col, Piece piece){
 }
 
 void print_moveset(bool** mat){
-    for(int col = 0; col < 17; col++){
-        for(int row = 0; row < 17; row++){
+    
+    for(int row = 0; row < 17; row++){    
+        for(int col = 0; col < 17; col++){   
             printf("%d ", mat[row][col]);
-            if(row == 16){
+            if(col == 16){
                 printf("\n");
             }
         }
@@ -284,9 +299,9 @@ void print_moveset(bool** mat){
 
 void print_board(Piece mat[8][8]){
 
-    for(int col = 0; col < 8; col++){
-        for(int row = 0; row < 8; row++){
-
+    for(int row = 0; row < 8; row++){
+    
+        for(int col = 0; col < 8; col++){
             /**
             if(col < 2){
                 auto const& colorized_text = color::rize( mat[row][col].name, "Black", "Blue" );
@@ -323,7 +338,7 @@ void print_board(Piece mat[8][8]){
             }
 
             //cout << mat[row][col].name;
-            if(row == 7){
+            if(col == 7){
                 printf("\n");
             }
         }
@@ -337,18 +352,11 @@ void game_loop(){
 
 int main()
 {
-    /**
-    auto const& colorized_text = color::rize( "I am a banana!", "Black", "Blue" );
-    cout << colorized_text << std::endl;
-    */
-    
     init_board();
     print_board(board.grid);
-    make_a_move(2,2,board.grid[1][1]);
+    make_a_move(2, 2, board.grid[1][2]);
     cout << "\n";
     print_board(board.grid);
     
-    
     return 0;
-
 }
