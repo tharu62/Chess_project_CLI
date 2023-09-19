@@ -1,6 +1,8 @@
 #include <iostream>
 #include <windows.h>
 #include <color.hpp>
+#include <climits>
+#include <windows.h> 
 #define INVALID -1;
 using namespace std;
 
@@ -24,6 +26,22 @@ class Board{
 Board board;
 Piece player_1[16];
 Piece player_2[16];
+
+void pos(short C, short R)
+{
+    COORD xy ;
+    xy.X = C ;
+    xy.Y = R ;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), xy);
+}
+
+void cls()
+{
+    pos(0,0);
+    for(int j=0;j<100;j++)
+    cout << string(100, ' ');
+    pos(0,0);
+} 
 
 bool** moveset(int row, int col){
 
@@ -227,10 +245,11 @@ void init_board(){
         }
 
     }
+    board.turn = 0;
 
 }
 
-void make_a_move(int row, int col, Piece piece){
+void make_move(int row, int col, Piece piece){
 
     if(piece.row > row && piece.col > col){
 
@@ -299,25 +318,12 @@ void print_moveset(bool** mat){
 
 void print_board(Piece mat[8][8]){
 
+    cout << "    A     B     C     D     E     F     G     H\n";
+
     for(int row = 0; row < 8; row++){
-    
+        
+        cout << row << " ";
         for(int col = 0; col < 8; col++){
-            /**
-            if(col < 2){
-                auto const& colorized_text = color::rize( mat[row][col].name, "Black", "Blue" );
-                cout << colorized_text;
-                mat[row][col].color = black;
-            }
-            if(col > 5){
-                auto const& colorized_text = color::rize( mat[row][col].name, "White", "Blue" );
-                cout << colorized_text;
-                mat[row][col].color = white;
-            }
-            if(col > 1 && col < 6){
-                auto const& colorized_text = color::rize( mat[row][col].name, "Red", "Blue" );
-                cout << colorized_text;
-            }
-            */
 
             switch (mat[row][col].color)
             {
@@ -346,17 +352,127 @@ void print_board(Piece mat[8][8]){
 
 }
 
-void game_loop(){
+void print_board_with_moveset(Piece piece){
 
+}
+
+void game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
+    
+    cls();
+    print_board(board.grid);
+    //make_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
+
+}
+
+int controlled_input_integer(){
+    int temp;
+    cin >> temp;
+    while (cin.fail())
+    {
+        cin.clear(); // clear input buffer to restore cin to a usable state
+        cin.ignore(INT_MAX, '\n'); // ignore last input
+        cout << " Puoi solo inserire numeri interi.\n";
+        cout << " Ritenta.\n";
+        cin >> temp;
+    }
+    return temp;
+}
+
+int controller_input_char(){
+    char temp;
+    while(1){
+        cin >> temp;
+        switch (toupper(temp))
+        {
+        case 'A':
+            return 0;
+        
+        case 'B':
+            return 1;
+
+        case 'C':
+            return 2;
+
+        case 'D':
+            return 3;        
+
+        case 'E':
+            return 4;
+
+        case 'F':
+            return 5;
+
+        case 'G':
+            return 6;
+
+        case 'H':
+            return 7;            
+
+        default:
+            cout << " Puoi solo inserire caratter tra A e H.\n";
+            cout << " Ritenta.\n";
+            break;
+        }
+    }
+    return -1;
 }
 
 int main()
 {
+    int piece_row = 0;
+    int piece_col = 0;
+    int dest_row = 0;
+    int dest_col = 0;
+
     init_board();
-    print_board(board.grid);
-    make_a_move(2, 2, board.grid[1][2]);
-    cout << "\n";
-    print_board(board.grid);
-    
+
+    while(1){
+
+        if(board.turn == 0){
+
+            cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
+            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
+            //cin >> piece_row;
+            piece_row = controlled_input_integer();
+            if(piece_row == -1){
+                cout << " HA VINTO IL NERO PER FORFAIT! ";
+                return 0;
+            }
+            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            piece_col = controller_input_char();
+
+            cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
+            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+            dest_row = controlled_input_integer();
+            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            dest_col = controller_input_char();
+
+            game_turn(white, dest_row, dest_col, piece_row, piece_col);
+            board.turn = 1;
+
+        }else{
+
+            cout << " <NERO> Inserisci il pezzo da spostare. \n";
+            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
+            piece_row = controlled_input_integer();
+            if(piece_row == -1){
+                cout << " HA VINTO IL BIANCO PER FORFAIT! ";
+                return 0;
+            }
+            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            piece_col = controller_input_char();
+
+            cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
+            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+            dest_row = controlled_input_integer();
+            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            dest_col =  controller_input_char();
+
+            game_turn(black, dest_row, dest_col, piece_row, piece_col);
+            board.turn = 0;
+        }
+        
+    }    
+
     return 0;
 }
