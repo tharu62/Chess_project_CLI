@@ -3,7 +3,7 @@
 #include <color.hpp>
 #include <climits>
 #include <windows.h> 
-#define INVALID -1;
+#define INVALID -1
 using namespace std;
 
 enum player_color {white = 0, black = 1, red = 2};
@@ -26,6 +26,10 @@ class Board{
 Board board;
 Piece player_1[16];
 Piece player_2[16];
+int piece_row = 0;
+int piece_col = 0;
+int dest_row = 0;
+int dest_col = 0;
 
 void pos(short C, short R)
 {
@@ -56,8 +60,8 @@ bool** moveset(int row, int col){
         // TORRE    
         case 0:
             
-            for(int col = 0; col < 17; col++){
-                for(int row = 0; row < 17; row++){
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
                     if(row == 8 || col == 8){
                         moveset[row][col] = true;
                     }else{
@@ -67,11 +71,24 @@ bool** moveset(int row, int col){
             } 
             return moveset;
 
+        case 7:
+            
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
+                    if(row == 8 || col == 8){
+                        moveset[row][col] = true;
+                    }else{
+                        moveset[row][col] = false;
+                    }
+                }
+            } 
+            return moveset;    
+
         // CAVALLO
         case 1:
             
-            for(int col = 0; col < 17; col++){
-                for(int row = 0; row < 17; row++){
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
                     if(((row == 6 || row == 10) && (col == 7 || col == 9)) || ((row == 7 || row == 9) && (col == 6 || col == 10))){
                         moveset[row][col] = true;
                     }else{
@@ -81,11 +98,24 @@ bool** moveset(int row, int col){
             } 
             return moveset;
 
+        case 6:
+            
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
+                    if(((row == 6 || row == 10) && (col == 7 || col == 9)) || ((row == 7 || row == 9) && (col == 6 || col == 10))){
+                        moveset[row][col] = true;
+                    }else{
+                        moveset[row][col] = false;
+                    }
+                }
+            } 
+            return moveset;    
+
         // ALFIERE
         case 2:
             
-            for(int col = 0; col < 17; col++){
-                for(int row = 0; row < 17; row++){
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
                     if(row == col || col == (16-row)){
                         moveset[row][col] = true;
                     }else{
@@ -95,11 +125,24 @@ bool** moveset(int row, int col){
             } 
             return moveset;
 
+        case 5:
+            
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
+                    if(row == col || col == (16-row)){
+                        moveset[row][col] = true;
+                    }else{
+                        moveset[row][col] = false;
+                    }
+                }
+            } 
+            return moveset;    
+
         // RE
         case 3:
             
-            for(int col = 0; col < 17; col++){
-                for(int row = 0; row < 17; row++){
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
                     if((row > 6 && row < 10) && (col > 6 && col < 10)){
                         moveset[row][col] = true;
                     }else{
@@ -112,8 +155,8 @@ bool** moveset(int row, int col){
         // REGINA
         case 4:
             
-            for(int col = 0; col < 17; col++){
-                for(int row = 0; row < 17; row++){
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
                     if(row == 8 || col == 8){
                         moveset[row][col] = true;
                     }else{
@@ -132,7 +175,6 @@ bool** moveset(int row, int col){
                 }
             } 
             return moveset;
-            break;
 
         default:
             break;
@@ -140,10 +182,10 @@ bool** moveset(int row, int col){
 
     }else{
 
-        if(row == 1 || col == 6){
+        if(row == 1 || row == 6){
             // PEDINA
-            for(int col = 0; col < 17; col++){
-                for(int row = 0; row < 17; row++){
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
                     if((row == 7 || row == 6) && col == 8){
                         moveset[row][col] = true;
                     }else{
@@ -154,8 +196,8 @@ bool** moveset(int row, int col){
             return moveset;
         }else{
 
-            for(int col = 0; col < 17; col++){
-                for(int row = 0; row < 17; row++){
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
                     moveset[row][col] = false;
                 }
             }
@@ -249,6 +291,53 @@ void init_board(){
 
 }
 
+bool valid_move(int row, int col, Piece piece){
+
+    if(piece.row > row && piece.col > col){
+
+        if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
+            return true;
+        }else{
+            return false;
+        }
+    
+    }else{
+
+        if(piece.row > row){
+
+            if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
+                return true;
+            }else{
+                return false;
+            }
+
+        }else{
+
+            if(piece.col > col){
+
+                if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
+                    return true;
+                }else{
+                    return false;
+                }
+
+            }else{
+
+                if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
+                    return true;
+                }else{
+                    return false;
+                }
+
+            }
+            
+        }
+
+    }
+    return false;
+
+}
+
 void make_move(int row, int col, Piece piece){
 
     if(piece.row > row && piece.col > col){
@@ -304,6 +393,7 @@ void make_move(int row, int col, Piece piece){
     
 }
 
+//funzione di debug, inutile per il funzionamento del programma.
 void print_moveset(bool** mat){
     
     for(int row = 0; row < 17; row++){    
@@ -318,6 +408,7 @@ void print_moveset(bool** mat){
 
 void print_board(Piece mat[8][8]){
 
+    cout << "\n";
     cout << "    A     B     C     D     E     F     G     H\n";
 
     for(int row = 0; row < 8; row++){
@@ -343,17 +434,71 @@ void print_board(Piece mat[8][8]){
                 break;
             }
 
-            //cout << mat[row][col].name;
             if(col == 7){
                 printf("\n");
             }
         }
     }
 
+    cout << "\n";
+
 }
 
 void print_board_with_moveset(Piece piece){
+    cout << "\n";
+    cout << "    A     B     C     D     E     F     G     H\n";
+    for(int row = 0; row < 8; row++){
+        cout << row << " ";
+        for(int col = 0; col < 8; col++){
 
+            if(valid_move(row, col, piece)){
+
+                switch (board.grid[row][col].color)
+                {
+                case black:
+                    cout << color::rize( board.grid[row][col].name, "Black", "Yellow" );
+                    break;
+                
+                case white:
+                    cout << color::rize( board.grid[row][col].name, "White", "Yellow" );
+                    break;
+
+                case red:
+                    cout << color::rize( board.grid[row][col].name, "Red", "Yellow" );
+                    break;
+
+                default:
+                    break;
+                }
+                
+            }else{
+
+                switch (board.grid[row][col].color)
+                {
+                case black:
+                    cout << color::rize( board.grid[row][col].name, "Black", "Blue" );
+                    break;
+                
+                case white:
+                    cout << color::rize( board.grid[row][col].name, "White", "Blue" );
+                    break;
+
+                case red:
+                    cout << color::rize( board.grid[row][col].name, "Red", "Blue" );
+                    break;
+
+                default:
+                    break;
+                }
+
+            }
+
+            if(col == 7){
+                printf("\n");
+            }
+        }
+    }
+    cout << "\n";
 }
 
 void game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
@@ -378,7 +523,7 @@ int controlled_input_integer(){
     return temp;
 }
 
-int controller_input_char(){
+int controlled_input_char(){
     char temp;
     while(1){
         cin >> temp;
@@ -414,62 +559,77 @@ int controller_input_char(){
             break;
         }
     }
-    return -1;
+    return INVALID;
+}
+
+int white_turn(){
+
+    cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
+    cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
+    piece_row = controlled_input_integer();
+    if(piece_row == INVALID){
+        cout << " HA VINTO IL NERO PER FORFAIT! ";
+        return 0;
+    }
+    cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+    piece_col = controlled_input_char();
+    print_board_with_moveset(board.grid[piece_row][piece_col]);
+
+    cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
+    cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+    dest_row = controlled_input_integer();
+    cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+    dest_col = controlled_input_char();
+
+    game_turn(white, dest_row, dest_col, piece_row, piece_col);
+    board.turn = 1;
+    return 1;
+}
+
+int black_turn(){
+
+    cout << " <NERO> Inserisci il pezzo da spostare. \n";
+    cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
+    piece_row = controlled_input_integer();
+    if(piece_row == INVALID){
+        cout << " HA VINTO IL BIANCO PER FORFAIT! ";
+        return 0;
+    }
+    cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+    piece_col = controlled_input_char();
+    print_board_with_moveset(board.grid[piece_row][piece_col]);
+
+    cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
+    cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+    dest_row = controlled_input_integer();
+    cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+    dest_col = controlled_input_char();
+
+    game_turn(black, dest_row, dest_col, piece_row, piece_col);
+    board.turn = 0;
+    return 1;
+
 }
 
 int main()
 {
-    int piece_row = 0;
-    int piece_col = 0;
-    int dest_row = 0;
-    int dest_col = 0;
-
     init_board();
+    print_board(board.grid);
 
     while(1){
 
         if(board.turn == 0){
 
-            cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
-            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
-            //cin >> piece_row;
-            piece_row = controlled_input_integer();
-            if(piece_row == -1){
-                cout << " HA VINTO IL NERO PER FORFAIT! ";
+            if(white_turn() == 0){
                 return 0;
             }
-            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            piece_col = controller_input_char();
-
-            cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
-            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
-            dest_row = controlled_input_integer();
-            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            dest_col = controller_input_char();
-
-            game_turn(white, dest_row, dest_col, piece_row, piece_col);
-            board.turn = 1;
 
         }else{
 
-            cout << " <NERO> Inserisci il pezzo da spostare. \n";
-            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
-            piece_row = controlled_input_integer();
-            if(piece_row == -1){
-                cout << " HA VINTO IL BIANCO PER FORFAIT! ";
+            if(black_turn() == 0){
                 return 0;
             }
-            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            piece_col = controller_input_char();
 
-            cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
-            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
-            dest_row = controlled_input_integer();
-            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            dest_col =  controller_input_char();
-
-            game_turn(black, dest_row, dest_col, piece_row, piece_col);
-            board.turn = 0;
         }
         
     }    
