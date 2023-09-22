@@ -314,28 +314,24 @@ void init_board(){
 
 bool valid_move(int row, int col, Piece piece){
 
+    /**
     if(piece.row > row && piece.col > col){
-
         if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
             return true;
+
         }else{
             return false;
         }
-    
+
     }else{
-
         if(piece.row > row){
-
             if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
                 return true;
             }else{
                 return false;
             }
-
         }else{
-
             if(piece.col > col){
-
                 if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
                     return true;
                 }else{
@@ -343,20 +339,145 @@ bool valid_move(int row, int col, Piece piece){
                 }
 
             }else{
-
                 if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
                     return true;
                 }else{
                     return false;
                 }
-
             }
-            
         }
-
+    }*/
+    
+    // diagonale superiore sinistra
+    if(piece.row > row && piece.col > col){
+        if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
+            int temp_col = piece.col-1;
+            for(int temp_row = piece.row-1; temp_row >= row; temp_row--){
+                if(temp_col < col){
+                    break;
+                }
+                if(board.grid[temp_row][temp_col].color != red){
+                    return false;
+                }
+                temp_col--;
+            }
+        }else{
+            return false;
+        }
     }
-    return false;
+    
+    // diagonale inferiore destra
+    if(piece.row < row && piece.col < col){
+        if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
+            int temp_col = piece.col+1;
+            for(int temp_row = piece.row+1; temp_row <= row; temp_row++){
+                if(temp_col < col){
+                    break;
+                }
+                if(board.grid[temp_row][temp_col].color != red){
+                    return false;
+                }
+                temp_col++;
+            }
+        }else{
+            return false;
+        }
+    }
 
+    // diagonale superiore destra
+    if(piece.row > row && piece.col < col){
+        if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
+            int temp_col = piece.col+1;
+            for(int temp_row = piece.row-1; temp_row >= row; temp_row--){
+                if(temp_col > col){
+                    break;
+                }
+                if(board.grid[temp_row][temp_col].color != red){
+                    return false;
+                }
+                temp_col++;
+            }
+        }else{
+            return false;
+        } 
+    }
+
+    // diagonale inferiore sinistra
+    if(piece.row < row && piece.col > col){
+        if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){   
+            int temp_col = piece.col-1;
+            for(int temp_row = piece.row+1; temp_row <= row; temp_row++){
+                if(temp_col < col){
+                    break;
+                }
+                if(board.grid[temp_row][temp_col].color != red){
+                    return false;
+                }
+                temp_col--;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    // colonna orizzonatale
+    if(piece.row == row){
+        // destra
+        if(piece.col < col){
+            if(piece.moveset[8][8 + (col - piece.col)]){
+                for(int temp_col = piece.col+1; temp_col <= col; temp_col++){
+                    if(board.grid[piece.row][temp_col].color != red){
+                        return false;
+                    }
+                }
+            }else{
+                return false;
+            }
+        }else{
+        // sinistra    
+            if(piece.moveset[8][8 - (piece.col - col)]){
+                for(int temp_col = piece.col-1; temp_col >= col; temp_col--){
+                    if(board.grid[piece.row][temp_col].color != red){
+                        return false;
+                    }
+                }    
+            
+            }else{
+                return false;
+            }
+        }
+    }
+
+    // colonna verticale
+    if(piece.col == col){
+        // inferiore
+        if(piece.row < row){
+            if(piece.moveset[8 - (row - piece.row)][8]){
+                for(int temp_row = piece.row+1; temp_row <= row; temp_row++){
+                    if(board.grid[temp_row][piece.col].color != red){
+                        return false;
+                    }
+                }
+            }else{
+                return false;
+            }
+        }else{
+        // superiore
+            if(piece.moveset[8 + (piece.row - row)][8]){
+
+                for(int temp_row = piece.row-1; temp_row >= row; temp_row--){
+                    if(board.grid[temp_row][piece.col].color != red){
+                        return false;
+                    }
+                }
+                
+            }else{
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 void make_move(int row, int col, Piece piece){
@@ -434,7 +555,7 @@ void make_move(int row, int col, Piece piece){
     
 }
 
-//funzione di debug, inutile per il funzionamento del programma.
+// Funzione di debug, inutile per il funzionamento del programma.
 void print_moveset(bool** mat){
     
     for(int row = 0; row < 17; row++){    
@@ -486,7 +607,6 @@ void print_board(Piece mat[8][8]){
 }
 
 void print_board_with_moveset(Piece piece){
-    Board new_board = board;
     cout << "\n";
     cout << "    A     B     C     D     E     F     G     H\n";
     for(int row = 0; row < 8; row++){
@@ -495,18 +615,18 @@ void print_board_with_moveset(Piece piece){
 
             if(valid_move(row, col, piece)){
 
-                switch (new_board.grid[row][col].color)
+                switch (board.grid[row][col].color)
                 {
                 case black:
-                    cout << color::rize( new_board.grid[row][col].name, "Black", "Yellow" );
+                    cout << color::rize(board.grid[row][col].name, "Black", "Yellow" );
                     break;
                 
                 case white:
-                    cout << color::rize( new_board.grid[row][col].name, "White", "Yellow" );
+                    cout << color::rize(board.grid[row][col].name, "White", "Yellow" );
                     break;
 
                 case red:
-                    cout << color::rize( new_board.grid[row][col].name, "Red", "Yellow" );
+                    cout << color::rize(board.grid[row][col].name, "Red", "Yellow" );
                     break;
 
                 default:
@@ -515,18 +635,18 @@ void print_board_with_moveset(Piece piece){
                 
             }else{
 
-                switch (new_board.grid[row][col].color)
+                switch (board.grid[row][col].color)
                 {
                 case black:
-                    cout << color::rize( new_board.grid[row][col].name, "Black", "Blue" );
+                    cout << color::rize(board.grid[row][col].name, "Black", "Blue" );
                     break;
                 
                 case white:
-                    cout << color::rize( new_board.grid[row][col].name, "White", "Blue" );
+                    cout << color::rize(board.grid[row][col].name, "White", "Blue" );
                     break;
 
                 case red:
-                    cout << color::rize( new_board.grid[row][col].name, "Red", "Blue" );
+                    cout << color::rize(board.grid[row][col].name, "Red", "Blue" );
                     break;
 
                 default:
@@ -593,7 +713,7 @@ bool king_under_check(player_color color){
         }
         if(board.grid[row][king_col].color != color && board.grid[row][king_col].color != red){
             if(valid_move(king_row, king_col, board.grid[row][king_col])){
-                king_cheking_piece[n] = board.grid[row][king_col];
+                //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
         }
@@ -606,7 +726,7 @@ bool king_under_check(player_color color){
         }
         if(board.grid[row][king_col].color != color && board.grid[row][king_col].color != red){
             if(valid_move(king_row, king_col, board.grid[row][king_col])){
-                king_cheking_piece[n] = board.grid[row][king_col];
+                //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
         }
@@ -620,7 +740,7 @@ bool king_under_check(player_color color){
         }
         if(board.grid[king_row][col].color != color && board.grid[king_row][col].color != red){
             if(valid_move(king_row, king_col, board.grid[king_row][col])){
-                king_cheking_piece[n] = board.grid[king_row][col];
+                //king_cheking_piece[n] = board.grid[king_row][col];
                 return true;
             }
         }
@@ -633,7 +753,7 @@ bool king_under_check(player_color color){
         }
         if(board.grid[king_row][col].color != color && board.grid[king_row][col].color != red){
             if(valid_move(king_row, king_col, board.grid[king_row][col])){
-                king_cheking_piece[n] = board.grid[king_row][col];
+                //king_cheking_piece[n] = board.grid[king_row][col];
                 return true;
             }
         }
@@ -644,7 +764,7 @@ bool king_under_check(player_color color){
         if(king_row > 1){
             if(board.grid[king_row-2][king_col-1].color != color && board.grid[king_row-2][king_col-1].color != red){
                 if(valid_move(king_row, king_col, board.grid[king_row-2][king_col-1])){
-                    king_cheking_piece[n] = board.grid[king_row-2][king_col-1];
+                    //king_cheking_piece[n] = board.grid[king_row-2][king_col-1];
                     return true;
                 }
             }
@@ -652,7 +772,7 @@ bool king_under_check(player_color color){
         if(king_col > 1){
             if(board.grid[king_row-1][king_col-2].color != color && board.grid[king_row-1][king_col-2].color != red){
                 if(valid_move(king_row, king_col, board.grid[king_row-1][king_col-2])){
-                    king_cheking_piece[n] = board.grid[king_row-1][king_col-2];
+                    //king_cheking_piece[n] = board.grid[king_row-1][king_col-2];
                     return true;
                 }
             }
@@ -662,7 +782,7 @@ bool king_under_check(player_color color){
         if(king_row < 6){
             if(board.grid[king_row+2][king_col+1].color != color && board.grid[king_row+2][king_col+1].color != red){
                 if(valid_move(king_row, king_col, board.grid[king_row+2][king_col+1])){
-                    king_cheking_piece[n] = board.grid[king_row+2][king_col+1];
+                    //king_cheking_piece[n] = board.grid[king_row+2][king_col+1];
                     return true;
                 }
             }
@@ -670,7 +790,7 @@ bool king_under_check(player_color color){
         if(king_col < 6){
             if(board.grid[king_row+1][king_col+2].color != color && board.grid[king_row+1][king_col+2].color != red){
                 if(valid_move(king_row, king_col, board.grid[king_row-1][king_col-2])){
-                    king_cheking_piece[n] = board.grid[king_row+1][king_col+2];
+                    //king_cheking_piece[n] = board.grid[king_row+1][king_col+2];
                     return true;
                 }
             }
@@ -683,7 +803,6 @@ void game_turn(player_color color, int dest_row, int dest_col, int piece_row, in
     
     cls();
 
-    // Controllo che il mio rè non sia sotto scacco
     // Controllo che il pezzo che sto spostando non scopra il rè ad uno scacco
     // Controllo se sto fancendo uno spostamento "attraversando" illeagalmente un altro pezzo (unica eccezzione cavallo).
     make_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
@@ -744,6 +863,14 @@ int controlled_input_char(){
     }
     return INVALID;
 }
+
+/**
+ * LOGICA DI CONTROLLO PER I TURNI:
+ * 1) Controllo se ho selezionato un pezzo del colore corretto. OK
+ * 2) Controllo se il proprio re è sotto scacco -> posso muovere solo i pezzi che possono "coprire" o "annullare" lo scacco.
+ * 3) Controllo se la mossa che ho inserito è valida per quel pezzo. OK
+ * 4) Controllo se la mossa che ho inserito scopra il proprio re ad uno scacco.
+*/
 
 int white_turn(){
 
