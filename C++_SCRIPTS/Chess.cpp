@@ -2,7 +2,6 @@
 #include <windows.h>
 #include <color.hpp>
 #include <climits>
-#include <windows.h> 
 #define INVALID -1
 using namespace std;
 
@@ -231,6 +230,44 @@ bool** moveset(int row, int col){
 
 }
 
+bool** special_moveset(int id){
+
+    bool** moveset = new bool*[17];
+    for (int i = 0; i < 17; ++i) {
+        moveset[i] = new bool[17];
+    }
+
+    switch (id)
+    {
+    case 0: // PEDONE DOPO PRIMA MOSSA BIANCO
+        for(int row = 0; row < 17; row++){
+            for(int col = 0; col < 17; col++){
+                if(row == 7 && (col == 7 || col == 9)){
+                    moveset[row][col] = true;
+                }else{
+                    moveset[row][col] = false;
+                }
+            }
+        } 
+        return moveset;
+    
+    case 1: // PEDONE DOPO PIRMA MOSSA NERO
+        for(int row = 0; row < 17; row++){
+            for(int col = 0; col < 17; col++){
+                if(row == 9 && (col == 7 || col == 9)){
+                    moveset[row][col] = true;
+                }else{
+                    moveset[row][col] = false;
+                }
+            }
+        } 
+        return moveset;
+
+    default:
+        return moveset;
+    }
+}
+
 string nameset(int row, int col){
 
     if(row == 0 || row == 7){
@@ -285,6 +322,17 @@ string nameset(int row, int col){
 
 }
 
+string special_nameset(int id){
+    switch (id)
+    {
+    case 0:
+        return " goku ";
+    
+    default:
+        return "pingu ";
+    }
+}
+
 void init_board(){
 
     for(int row = 0; row < 8; row++){
@@ -313,40 +361,6 @@ void init_board(){
 }
 
 bool valid_move(int row, int col, Piece piece){
-
-    /**
-    if(piece.row > row && piece.col > col){
-        if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
-            return true;
-
-        }else{
-            return false;
-        }
-
-    }else{
-        if(piece.row > row){
-            if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
-                return true;
-            }else{
-                return false;
-            }
-        }else{
-            if(piece.col > col){
-                if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
-                    return true;
-                }else{
-                    return false;
-                }
-
-            }else{
-                if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
-                    return true;
-                }else{
-                    return false;
-                }
-            }
-        }
-    }*/
     
     // diagonale superiore sinistra
     if(piece.row > row && piece.col > col){
@@ -357,6 +371,9 @@ bool valid_move(int row, int col, Piece piece){
                     break;
                 }
                 if(board.grid[temp_row][temp_col].color != red){
+                    if(temp_row == row && temp_col == col && board.grid[temp_row][temp_col].color != piece.color){
+                        return true;
+                    }
                     return false;
                 }
                 temp_col--;
@@ -371,10 +388,13 @@ bool valid_move(int row, int col, Piece piece){
         if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
             int temp_col = piece.col+1;
             for(int temp_row = piece.row+1; temp_row <= row; temp_row++){
-                if(temp_col < col){
+                if(temp_col > col){
                     break;
                 }
                 if(board.grid[temp_row][temp_col].color != red){
+                    if(temp_row == row && temp_col == col && board.grid[temp_row][temp_col].color != piece.color){
+                        return true;
+                    }
                     return false;
                 }
                 temp_col++;
@@ -393,6 +413,9 @@ bool valid_move(int row, int col, Piece piece){
                     break;
                 }
                 if(board.grid[temp_row][temp_col].color != red){
+                    if(temp_row == row && temp_col == col && board.grid[temp_row][temp_col].color != piece.color){
+                        return true;
+                    }
                     return false;
                 }
                 temp_col++;
@@ -411,6 +434,9 @@ bool valid_move(int row, int col, Piece piece){
                     break;
                 }
                 if(board.grid[temp_row][temp_col].color != red){
+                    if(temp_row == row && temp_col == col && board.grid[temp_row][temp_col].color != piece.color){
+                        return true;
+                    }
                     return false;
                 }
                 temp_col--;
@@ -427,6 +453,9 @@ bool valid_move(int row, int col, Piece piece){
             if(piece.moveset[8][8 + (col - piece.col)]){
                 for(int temp_col = piece.col+1; temp_col <= col; temp_col++){
                     if(board.grid[piece.row][temp_col].color != red){
+                        if(temp_col == col && board.grid[piece.row][temp_col].color != piece.color){
+                            return true;
+                        }
                         return false;
                     }
                 }
@@ -438,6 +467,9 @@ bool valid_move(int row, int col, Piece piece){
             if(piece.moveset[8][8 - (piece.col - col)]){
                 for(int temp_col = piece.col-1; temp_col >= col; temp_col--){
                     if(board.grid[piece.row][temp_col].color != red){
+                        if(temp_col == col && board.grid[piece.row][temp_col].color != piece.color){
+                            return true;
+                        }
                         return false;
                     }
                 }    
@@ -455,6 +487,9 @@ bool valid_move(int row, int col, Piece piece){
             if(piece.moveset[8 - (row - piece.row)][8]){
                 for(int temp_row = piece.row+1; temp_row <= row; temp_row++){
                     if(board.grid[temp_row][piece.col].color != red){
+                        if(temp_row == row && board.grid[temp_row][piece.col].color != piece.color){
+                            return true;
+                        }
                         return false;
                     }
                 }
@@ -467,6 +502,9 @@ bool valid_move(int row, int col, Piece piece){
 
                 for(int temp_row = piece.row-1; temp_row >= row; temp_row--){
                     if(board.grid[temp_row][piece.col].color != red){
+                        if(temp_row == row && board.grid[temp_row][piece.col].color != piece.color){
+                            return true;
+                        }
                         return false;
                     }
                 }
@@ -799,16 +837,21 @@ bool king_under_check(player_color color){
     return false;
 }
 
+void pawn_promotion(Piece piece){
+
+    /**
+    piece.name = " new_piece ";
+    piece.moveset = moveset(x,y);
+    piece.moveset = special_moveset(id);
+    */
+
+}
+
 void game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
     
-    cls();
-
-    // Controllo che il pezzo che sto spostando non scopra il rè ad uno scacco
-    // Controllo se sto fancendo uno spostamento "attraversando" illeagalmente un altro pezzo (unica eccezzione cavallo).
+    //cls();
     make_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
-
-    print_board(board.grid);
-
+    
 }
 
 int controlled_input_integer(){
@@ -866,17 +909,22 @@ int controlled_input_char(){
 
 /**
  * LOGICA DI CONTROLLO PER I TURNI:
- * 1) Controllo se ho selezionato un pezzo del colore corretto. OK
- * 2) Controllo se il proprio re è sotto scacco -> posso muovere solo i pezzi che possono "coprire" o "annullare" lo scacco.
- * 3) Controllo se la mossa che ho inserito è valida per quel pezzo. OK
- * 4) Controllo se la mossa che ho inserito scopra il proprio re ad uno scacco.
+ * 1) Controllo se il mio re è sotto scacco -> posso muovere solo i pezzi che possono "coprire" o "annullare" lo scacco. [NOPE]
+ * 2) Controllo se ho selezionato un pezzo del colore corretto. [OK]
+ * 3) Controllo se la mossa che ho inserito è valida per quel pezzo. [OK]
+ * 4) Controllo se la mossa che ho inserito scopra il mio re ad uno scacco. [NOPE]
+ * 5) Controllo se sto facendo una promozione di pedina. [NOPE]
 */
 
 int white_turn(){
 
+    if(king_under_check(white)){
+        cout << " IL RE E' SOTTO SCACCO! DIFENDILO! " << endl;
+    }
+
     do{
         cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
-        cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
+        cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) ( -1 per forfait ) : ";
         piece_row = controlled_input_integer();
         if(piece_row == INVALID){
             cout << " HA VINTO IL NERO PER FORFAIT! ";
@@ -890,18 +938,32 @@ int white_turn(){
 
     do{
         cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
-        cout << " <BIANCO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+        cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) : ";
         dest_row = controlled_input_integer();
         cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
         dest_col = controlled_input_char();
     }while(board.grid[dest_row-1][dest_col].color == white || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
 
     game_turn(white, dest_row-1, dest_col, piece_row-1, piece_col);
+    
+    if(board.grid[dest_row-1][dest_col].name == " pawn "){
+        if(piece_row == 7){
+            board.grid[dest_row-1][dest_col].moveset = special_moveset(1);
+        }
+        if(board.grid[piece_row][piece_col].color == white && dest_row == 0){
+            pawn_promotion(board.grid[piece_row][piece_col]);
+        }
+    }
+    print_board(board.grid);
     board.turn = 1;
     return 1;
 }
 
 int black_turn(){
+
+    if(king_under_check(black)){
+        cout << " IL RE E' SOTTO SCACCO! DIFENDILO! " << endl;
+    }
 
     do{
         cout << " <NERO> Inserisci il pezzo da spostare. \n";
@@ -926,6 +988,19 @@ int black_turn(){
     }while(board.grid[dest_row-1][dest_col].color == black || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
 
     game_turn(black, dest_row-1, dest_col, piece_row-1, piece_col);
+    if(board.grid[dest_row-1][dest_col].name == " pawn "){
+
+        if(piece_row == 2){
+                
+            board.grid[dest_row-1][dest_col].moveset = special_moveset(0);
+        }
+
+        if(board.grid[piece_row][piece_col].color == black && dest_row == 7){
+            pawn_promotion(board.grid[piece_row][piece_col]);
+        }
+
+    }
+    print_board(board.grid);
     board.turn = 0;
     return 1;
 
@@ -940,18 +1015,12 @@ int main()
 
         if(board.turn == 0){
 
-            if(king_under_check(white)){
-                cout << " IL RE E' SOTTO SCACCO! DIFENDILO! " << endl;
-            }
             if(white_turn() == 0){
                 return 0;
             }
 
         }else{
 
-            if(king_under_check(black)){
-                cout << " IL RE E' SOTTO SCACCO! DIFENDILO! " << endl;
-            }
             if(black_turn() == 0){
                 return 0;
             }
