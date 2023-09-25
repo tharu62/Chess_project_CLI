@@ -686,7 +686,7 @@ void print_board(Piece mat[8][8]){
 
     for(int row = 0; row < 8; row++){
         
-        cout << row+1 << " ";
+        cout << 8-row << " ";
         for(int col = 0; col < 8; col++){
 
             switch (mat[row][col].color)
@@ -721,7 +721,8 @@ void print_board_with_moveset(Piece piece){
     cout << "\n";
     cout << "    A     B     C     D     E     F     G     H\n";
     for(int row = 0; row < 8; row++){
-        cout << row+1 << " ";
+        
+        cout << 8-row << " ";
         for(int col = 0; col < 8; col++){
 
             if(valid_move(row, col, piece)){
@@ -815,6 +816,73 @@ bool virtual_king_under_check(player_color color){
      *  8    -  -  -  -  -  -  -  -     
      *    
     */
+
+    int col = 0;
+    int row = 0;
+    
+    // Controllo diagonale superiore sinistra
+    col = king_col-1;
+    for(int row = king_row-1; row >= 0 && col >= 0; row--){
+
+        if(support_board.grid[row][col].color == color){
+            break;
+        }
+        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col--;
+    }
+
+    // Controllo diagonale superiore destra
+    col = king_col+1;
+    for(int row = king_row-1; row >= 0 && col < 8; row--){
+
+        if(support_board.grid[row][col].color == color){
+            break;
+        }
+        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col++;
+    }
+
+    // Controllo diagonale inferiore sinistra
+    col = king_col-1;
+    for(int row = king_row+1; row < 8 && col >= 0; row++){
+
+        if(support_board.grid[row][col].color == color){
+            break;
+        }
+        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col--;
+    }
+
+    // Controllo diagonale inferiore destra
+    col = king_col+1;
+    for(int row = king_row+1; row < 8 && col < 8; row++){
+
+        if(support_board.grid[row][col].color == color){
+            break;
+        }
+        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col++;
+    }
     
     // Controllo colonna superiore.
     for(int row = king_row+1; row < 8; row++){
@@ -1132,7 +1200,7 @@ void virtual_game_turn(player_color color, int dest_row, int dest_col, int piece
 
 void game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
     
-    //cls();
+    cls();
     make_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
     
 }
@@ -1148,6 +1216,7 @@ int controlled_input_integer(){
         cout << " Ritenta.\n";
         cin >> temp;
     }
+    temp = 8-temp;
     return temp;
 }
 
@@ -1195,21 +1264,17 @@ int controlled_input_char(){
  * 
  * (1) Controllo se il mio re è sotto scacco [OK]
  * 
- * (2) <<IL GIOCATORE INSERISCE LE COORDINATE DEL PEZZO DA SPOSTARE>> [OK]
+ * (2) <<INSERISCO LE COORDINATE DEL PEZZO DA SPOSTARE>> [OK]
  * 
  * (3) Controllo se ho selezionato un pezzo del colore corretto. [OK]
  * 
- * (4) <<IL GIOCATORE INSERISCE LE NUOVE COORDINATE DEL PEZZO SELEZIONATO>> [OK]
+ * (4) <<INSERISCO LE NUOVE COORDINATE DEL PEZZO SELEZIONATO>> [OK]
  * 
  * (5) Controllo se la mossa che ho inserito è valida per quel pezzo. (=> non attraverso illegalmente altri pezzi ed e' coerente con moveset) [OK]
- * 
- * (6) Controllo se la mossa che ho inserito scopre il mio re ad uno scacco. [NOPE]
  *
- * (7) Controllo se il re risulta ancora sotto scacco, ho 2 opzioni: [NOPE]
- *    1. RIPETO LOOP DAL PUNTO 1. 
- *    2. RIPETO LOOP DAL PUNTO 4.
+ * (6) Se il re risulta ancora sotto scacco, RIPETO LOOP DAL PUNTO 1. [OK] 
  * 
- * (8) Controllo se sto facendo una promozione di pedina. [NOPE]
+ * (7) Controllo se sto facendo una promozione di pedina. [NOPE]
  *     <<SELEZIONO IL TIPO DI PEZZO A CUI PROMUOVERE LA PEDINA>> [NOPE]
  * 
  ************************* SE IL RE NON E' SOTTO SCACCO E LA MOSSA E' VALIDA SI ESCE DAL LOOP *************************************************
@@ -1231,9 +1296,9 @@ int white_turn(){
             }
             cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
             piece_col = controlled_input_char();
-        }while(board.grid[piece_row-1][piece_col].color != white);
+        }while(board.grid[piece_row][piece_col].color != white);
 
-        print_board_with_moveset(board.grid[piece_row-1][piece_col]);
+        print_board_with_moveset(board.grid[piece_row][piece_col]);
 
         do{
             cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
@@ -1241,17 +1306,17 @@ int white_turn(){
             dest_row = controlled_input_integer();
             cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
             dest_col = controlled_input_char();
-        }while(board.grid[dest_row-1][dest_col].color == white || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
+        }while(board.grid[dest_row][dest_col].color == white || board.grid[dest_row][dest_col].name == " king " || !valid_move(dest_row, dest_col, board.grid[piece_row][piece_col]));
 
-        //virtual_game_turn(white, dest_row-1, dest_col, piece_row-1, piece_col);
+        virtual_game_turn(white, dest_row, dest_col, piece_row, piece_col);
 
-    }while(king_under_check(white));
-    
+    }while(virtual_king_under_check(white));
 
-    game_turn(white, dest_row-1, dest_col, piece_row-1, piece_col);  
-    if(board.grid[dest_row-1][dest_col].name == " pawn "){
+
+    game_turn(white, dest_row, dest_col, piece_row, piece_col);  
+    if(board.grid[dest_row][dest_col].name == " pawn "){
         if(piece_row == 7){
-            board.grid[dest_row-1][dest_col].moveset = special_moveset(1);
+            board.grid[dest_row][dest_col].moveset = special_moveset(1);
         }
         if(board.grid[piece_row][piece_col].color == white && dest_row == 0){
             pawn_promotion(board.grid[piece_row][piece_col]);
@@ -1281,9 +1346,9 @@ int black_turn(){
             }
             cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
             piece_col = controlled_input_char();
-        }while(board.grid[piece_row-1][piece_col].color != black);
+        }while(board.grid[piece_row][piece_col].color != black);
 
-        print_board_with_moveset(board.grid[piece_row-1][piece_col]);
+        print_board_with_moveset(board.grid[piece_row][piece_col]);
 
         do{
             cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
@@ -1291,18 +1356,18 @@ int black_turn(){
             dest_row = controlled_input_integer();
             cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
             dest_col = controlled_input_char();
-        }while(board.grid[dest_row-1][dest_col].color == black || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
+        }while(board.grid[dest_row][dest_col].color == black || board.grid[dest_row][dest_col].name == " king " || !valid_move(dest_row, dest_col, board.grid[piece_row][piece_col]));
 
-        //virtual_game_turn(black, dest_row-1, dest_col, piece_row-1, piece_col);
+        virtual_game_turn(black, dest_row, dest_col, piece_row, piece_col);
 
-    }while(king_under_check(black));
+    }while(virtual_king_under_check(black));
 
-    game_turn(black, dest_row-1, dest_col, piece_row-1, piece_col);
-    if(board.grid[dest_row-1][dest_col].name == " pawn "){
+    game_turn(black, dest_row, dest_col, piece_row, piece_col);
+    if(board.grid[dest_row][dest_col].name == " pawn "){
 
         if(piece_row == 2){
                 
-            board.grid[dest_row-1][dest_col].moveset = special_moveset(0);
+            board.grid[dest_row][dest_col].moveset = special_moveset(0);
         }
 
         if(board.grid[piece_row][piece_col].color == black && dest_row == 7){
