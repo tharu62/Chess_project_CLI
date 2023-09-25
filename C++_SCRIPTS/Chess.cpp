@@ -908,12 +908,28 @@ int controlled_input_char(){
 }
 
 /**
- * LOGICA DI CONTROLLO PER I TURNI:
- * 1) Controllo se il mio re è sotto scacco -> posso muovere solo i pezzi che possono "coprire" o "annullare" lo scacco. [NOPE]
- * 2) Controllo se ho selezionato un pezzo del colore corretto. [OK]
- * 3) Controllo se la mossa che ho inserito è valida per quel pezzo. [OK]
- * 4) Controllo se la mossa che ho inserito scopra il mio re ad uno scacco. [NOPE]
- * 5) Controllo se sto facendo una promozione di pedina. [NOPE]
+ ********************************** LOOP DI CONTROLLO PER I TURNI *******************************************************************************
+ * 
+ * (1) Controllo se il mio re è sotto scacco [OK]
+ * 
+ *  <<IL GIOCATORE INSERISCE LE COORDINATE DEL PEZZO DA SPOSTARE>> [OK]
+ * 
+ * (2) Controllo se ho selezionato un pezzo del colore corretto. [OK]
+ * 
+ *  <<IL GIOCATORE INSERISCE LE NUOVE COORDINATE DEL PEZZO SELEZIONATO>> [OK]
+ * 
+ * (3) Controllo se la mossa che ho inserito è valida per quel pezzo. (=> non attraverso illegalmente altri pezzi ed e' coerente con moveset) [OK]
+ * 
+ * (4) Controllo se la mossa che ho inserito scopra il mio re' ad uno scacco. [NOPE]
+ * 
+ * (5) Controllo se sto facendo una promozione di pedina. [NOPE]
+ *   <<SELEZIONO IL TIPO DI PEZZO A CUI PROMUOVERE LA PEDINA>> [NOPE]
+ * 
+ * (6) Controllo se con la mossa inserita il re' risulta ancora sotto scacco, ho 2 opzioni: [NOPE]
+ *    1. RIPETO LOOP DAL PUNTO 1. 
+ *    2. ri-seleziono solo la nuova posizione del pezzo prima selezionato.
+ * 
+ ************************* SE IL RE' NON E' SOTTO SCACCO E LA MOSSA E' VALIDA SI ESCE DAL LOOP *************************************************
 */
 
 int white_turn(){
