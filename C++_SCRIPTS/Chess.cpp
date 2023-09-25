@@ -23,6 +23,7 @@ class Board{
 };
 
 Board board;
+Board support_board;
 Piece player_1[16];
 Piece player_2[16];
 int piece_row = 0;
@@ -242,7 +243,7 @@ bool** special_moveset(int id){
     case 0: // PEDONE DOPO PRIMA MOSSA BIANCO
         for(int row = 0; row < 17; row++){
             for(int col = 0; col < 17; col++){
-                if(row == 7 && (col == 7 || col == 9)){
+                if(row == 7 && (col == 7 || col == 8 || col == 9)){
                     moveset[row][col] = true;
                 }else{
                     moveset[row][col] = false;
@@ -254,7 +255,7 @@ bool** special_moveset(int id){
     case 1: // PEDONE DOPO PIRMA MOSSA NERO
         for(int row = 0; row < 17; row++){
             for(int col = 0; col < 17; col++){
-                if(row == 9 && (col == 7 || col == 9)){
+                if(row == 9 && (col == 7 || col == 8 || col == 9)){
                     moveset[row][col] = true;
                 }else{
                     moveset[row][col] = false;
@@ -518,6 +519,78 @@ bool valid_move(int row, int col, Piece piece){
     return true;
 }
 
+void make_virtual_move(int row, int col, Piece piece){
+    if((support_board.turn == 1 && piece.color ==  white) || (support_board.turn == 0 && piece.color == black)){
+        cout << "\nMOVE NOT VALID\n";
+        return;
+    }
+    if(piece.row > row && piece.col > col){
+
+        if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
+            support_board.grid[row][col].col = col;
+            support_board.grid[row][col].row = row;
+            support_board.grid[row][col].color = piece.color;
+            support_board.grid[row][col].moveset = piece.moveset;
+            support_board.grid[row][col].name = piece.name;
+            support_board.grid[piece.row][piece.col].name = " void ";
+            support_board.grid[piece.row][piece.col].color = red;
+        }else{
+            cout << "\nMOVE NOT VALID\n";
+        }
+    
+    }else{
+
+        if(piece.row > row){
+
+            if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
+                support_board.grid[row][col].col = col;
+                support_board.grid[row][col].row = row;
+                support_board.grid[row][col].color = piece.color;
+                support_board.grid[row][col].moveset = piece.moveset;
+                support_board.grid[row][col].name = piece.name;
+                support_board.grid[piece.row][piece.col].name = " void ";
+                support_board.grid[piece.row][piece.col].color = red;
+            }else{
+                cout << "\nMOVE NOT VALID\n";
+            }
+
+        }else{
+
+            if(piece.col > col){
+
+                if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
+                    support_board.grid[row][col].col = col;
+                    support_board.grid[row][col].row = row;
+                    support_board.grid[row][col].color = piece.color;
+                    support_board.grid[row][col].moveset = piece.moveset;
+                    support_board.grid[row][col].name = piece.name;
+                    support_board.grid[piece.row][piece.col].name = " void ";
+                    support_board.grid[piece.row][piece.col].color = red;
+                }else{
+                    cout << "\nMOVE NOT VALID\n";
+                }
+
+            }else{
+
+                if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
+                    support_board.grid[row][col].col = col;
+                    support_board.grid[row][col].row = row;
+                    support_board.grid[row][col].color = piece.color;
+                    support_board.grid[row][col].moveset = piece.moveset;
+                    support_board.grid[row][col].name = piece.name;
+                    support_board.grid[piece.row][piece.col].name = " void ";
+                    support_board.grid[piece.row][piece.col].color = red;
+                }else{
+                    cout << "\nMOVE NOT VALID\n";
+                }
+
+            }
+            
+        }
+
+    }
+}
+
 void make_move(int row, int col, Piece piece){
 
     if((board.turn == 1 && piece.color ==  white) || (board.turn == 0 && piece.color == black)){
@@ -701,6 +774,141 @@ void print_board_with_moveset(Piece piece){
     cout << "\n";
 }
 
+bool virtual_king_under_check(player_color color){
+     int king_row = 0;
+    int king_col = 0;
+    for(king_row = 0; king_row < 8; king_row++){
+        for(king_col = 0; king_col < 8; king_col++){
+            if(support_board.grid[king_row][king_col].name == " king " && support_board.grid[king_row][king_col].color == color){
+                goto endFor;
+            }
+        }
+    }
+    endFor:
+
+    /** ESEMPIO DI LINEE CONTROLLATE PER CHECK SUL RE' (RE = K)
+     * 
+     *  | CONTROLLO PER TORRE-ALFIERE-REGINA-RE-PEDINA | 
+     * 
+     *       A  B  C  D  E  F  G  H
+     * 
+     *  1    0  -  -  -  0  -  -  -
+     *  2    -  0  -  -  0  -  -  0 
+     *  3    -  -  0  -  0  -  0  - 
+     *  4    -  -  -  0  0  0  -  - 
+     *  5    0  0  0  0  K  0  0  0 
+     *  6    -  -  -  0  0  0  -  - 
+     *  7    -  -  0  -  0  -  0  -
+     *  8    -  0  -  -  0  -  -  0
+     *  
+     *  | CONTROLLO PER CAVALLO |
+     *  
+     *       A  B  C  D  E  F  G  H
+     * 
+     *  1    -  -  -  -  -  -  -  -
+     *  2    -  -  -  -  -  -  -  - 
+     *  3    -  -  -  0  -  0  -  - 
+     *  4    -  -  0  -  -  -  0  - 
+     *  5    -  -  -  -  K  -  -  - 
+     *  6    -  -  0  -  -  -  0  - 
+     *  7    -  -  -  0  -  0  -  -
+     *  8    -  -  -  -  -  -  -  -     
+     *    
+    */
+    
+    // Controllo colonna superiore.
+    for(int row = king_row+1; row < 8; row++){
+        if(support_board.grid[row][king_col].color == color){
+            break;
+        }
+        if(support_board.grid[row][king_col].color != color && support_board.grid[row][king_col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[row][king_col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+    }
+    
+    // Controllo colonna inferiore.
+    for(int row = king_row-1; row >= 0; row--){
+        if(support_board.grid[row][king_col].color == color){
+            break;
+        }
+        if(support_board.grid[row][king_col].color != color && support_board.grid[row][king_col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[row][king_col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+    }
+    
+    
+    // Controllo riga destra.
+    for(int col = king_col+1; col < 8; col++){
+        if(support_board.grid[king_row][col].color == color){
+            break;
+        }
+        if(support_board.grid[king_row][col].color != color && support_board.grid[king_row][col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[king_row][col])){
+                //king_cheking_piece[n] = board.grid[king_row][col];
+                return true;
+            }
+        }
+    }
+
+    // Controllo riga sinistra.
+    for(int col = king_col-1; col >= 0; col--){
+        if(support_board.grid[king_row][col].color == color){
+            break;
+        }
+        if(support_board.grid[king_row][col].color != color && support_board.grid[king_row][col].color != red){
+            if(valid_move(king_row, king_col, support_board.grid[king_row][col])){
+                //king_cheking_piece[n] = board.grid[king_row][col];
+                return true;
+            }
+        }
+    }
+    
+    // Controllo per il cavallo
+    if(king_row > 0 && king_col > 0){
+        if(king_row > 1){
+            if(support_board.grid[king_row-2][king_col-1].color != color && support_board.grid[king_row-2][king_col-1].color != red){
+                if(valid_move(king_row, king_col, support_board.grid[king_row-2][king_col-1])){
+                    //king_cheking_piece[n] = board.grid[king_row-2][king_col-1];
+                    return true;
+                }
+            }
+        }
+        if(king_col > 1){
+            if(support_board.grid[king_row-1][king_col-2].color != color && support_board.grid[king_row-1][king_col-2].color != red){
+                if(valid_move(king_row, king_col, support_board.grid[king_row-1][king_col-2])){
+                    //king_cheking_piece[n] = board.grid[king_row-1][king_col-2];
+                    return true;
+                }
+            }
+        }
+    }
+    if(king_row < 7 && king_col < 7){
+        if(king_row < 6){
+            if(support_board.grid[king_row+2][king_col+1].color != color && support_board.grid[king_row+2][king_col+1].color != red){
+                if(valid_move(king_row, king_col, support_board.grid[king_row+2][king_col+1])){
+                    //king_cheking_piece[n] = board.grid[king_row+2][king_col+1];
+                    return true;
+                }
+            }
+        }
+        if(king_col < 6){
+            if(support_board.grid[king_row+1][king_col+2].color != color && support_board.grid[king_row+1][king_col+2].color != red){
+                if(valid_move(king_row, king_col, support_board.grid[king_row-1][king_col-2])){
+                    //king_cheking_piece[n] = board.grid[king_row+1][king_col+2];
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 bool king_under_check(player_color color){
     
     int king_row = 0;
@@ -743,7 +951,74 @@ bool king_under_check(player_color color){
      *  8    -  -  -  -  -  -  -  -     
      *    
     */
+
+    int col = 0;
+    int row = 0;
     
+    // Controllo diagonale superiore sinistra
+    col = king_col-1;
+    for(int row = king_row-1; row >= 0 && col >= 0; row--){
+
+        if(board.grid[row][col].color == color){
+            break;
+        }
+        if(board.grid[row][col].color != color && board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col--;
+    }
+
+    // Controllo diagonale superiore destra
+    col = king_col+1;
+    for(int row = king_row-1; row >= 0 && col < 8; row--){
+
+        if(board.grid[row][col].color == color){
+            break;
+        }
+        if(board.grid[row][col].color != color && board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col++;
+    }
+
+    // Controllo diagonale inferiore sinistra
+    col = king_col-1;
+    for(int row = king_row+1; row < 8 && col >= 0; row++){
+
+        if(board.grid[row][col].color == color){
+            break;
+        }
+        if(board.grid[row][col].color != color && board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col--;
+    }
+
+    // Controllo diagonale inferiore destra
+    col = king_col+1;
+    for(int row = king_row+1; row < 8 && col < 8; row++){
+
+        if(board.grid[row][col].color == color){
+            break;
+        }
+        if(board.grid[row][col].color != color && board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, board.grid[row][col])){
+                //king_cheking_piece[n] = board.grid[row][king_col];
+                return true;
+            }
+        }
+        col++;
+    }
+
     // Controllo colonna superiore.
     for(int row = king_row+1; row < 8; row++){
         if(board.grid[row][king_col].color == color){
@@ -769,7 +1044,6 @@ bool king_under_check(player_color color){
             }
         }
     }
-    
     
     // Controllo riga destra.
     for(int col = king_col+1; col < 8; col++){
@@ -847,6 +1121,15 @@ void pawn_promotion(Piece piece){
 
 }
 
+bool checkmate(){
+    return false;
+}
+
+void virtual_game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
+    support_board = board;
+    make_virtual_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
+}
+
 void game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
     
     //cls();
@@ -912,56 +1195,60 @@ int controlled_input_char(){
  * 
  * (1) Controllo se il mio re è sotto scacco [OK]
  * 
- *  <<IL GIOCATORE INSERISCE LE COORDINATE DEL PEZZO DA SPOSTARE>> [OK]
+ * (2) <<IL GIOCATORE INSERISCE LE COORDINATE DEL PEZZO DA SPOSTARE>> [OK]
  * 
- * (2) Controllo se ho selezionato un pezzo del colore corretto. [OK]
+ * (3) Controllo se ho selezionato un pezzo del colore corretto. [OK]
  * 
- *  <<IL GIOCATORE INSERISCE LE NUOVE COORDINATE DEL PEZZO SELEZIONATO>> [OK]
+ * (4) <<IL GIOCATORE INSERISCE LE NUOVE COORDINATE DEL PEZZO SELEZIONATO>> [OK]
  * 
- * (3) Controllo se la mossa che ho inserito è valida per quel pezzo. (=> non attraverso illegalmente altri pezzi ed e' coerente con moveset) [OK]
+ * (5) Controllo se la mossa che ho inserito è valida per quel pezzo. (=> non attraverso illegalmente altri pezzi ed e' coerente con moveset) [OK]
  * 
- * (4) Controllo se la mossa che ho inserito scopra il mio re' ad uno scacco. [NOPE]
- * 
- * (5) Controllo se sto facendo una promozione di pedina. [NOPE]
- *   <<SELEZIONO IL TIPO DI PEZZO A CUI PROMUOVERE LA PEDINA>> [NOPE]
- * 
- * (6) Controllo se con la mossa inserita il re' risulta ancora sotto scacco, ho 2 opzioni: [NOPE]
+ * (6) Controllo se la mossa che ho inserito scopre il mio re ad uno scacco. [NOPE]
+ *
+ * (7) Controllo se il re risulta ancora sotto scacco, ho 2 opzioni: [NOPE]
  *    1. RIPETO LOOP DAL PUNTO 1. 
- *    2. ri-seleziono solo la nuova posizione del pezzo prima selezionato.
+ *    2. RIPETO LOOP DAL PUNTO 4.
  * 
- ************************* SE IL RE' NON E' SOTTO SCACCO E LA MOSSA E' VALIDA SI ESCE DAL LOOP *************************************************
+ * (8) Controllo se sto facendo una promozione di pedina. [NOPE]
+ *     <<SELEZIONO IL TIPO DI PEZZO A CUI PROMUOVERE LA PEDINA>> [NOPE]
+ * 
+ ************************* SE IL RE NON E' SOTTO SCACCO E LA MOSSA E' VALIDA SI ESCE DAL LOOP *************************************************
 */
 
 int white_turn(){
 
-    if(king_under_check(white)){
-        cout << " IL RE E' SOTTO SCACCO! DIFENDILO! " << endl;
-    }
-
     do{
-        cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
-        cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) ( -1 per forfait ) : ";
-        piece_row = controlled_input_integer();
-        if(piece_row == INVALID){
-            cout << " HA VINTO IL NERO PER FORFAIT! ";
-            return 0;
+        if(king_under_check(white)){
+            cout << " IL RE E' SOTTO SCACCO! " << endl;
         }
-        cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-        piece_col = controlled_input_char();
-    }while(board.grid[piece_row-1][piece_col].color != white);
+        do{
+            cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
+            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) ( -1 per forfait ) : ";
+            piece_row = controlled_input_integer();
+            if(piece_row == INVALID){
+                cout << " HA VINTO IL NERO PER FORFAIT! ";
+                return 0;
+            }
+            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            piece_col = controlled_input_char();
+        }while(board.grid[piece_row-1][piece_col].color != white);
 
-    print_board_with_moveset(board.grid[piece_row-1][piece_col]);
+        print_board_with_moveset(board.grid[piece_row-1][piece_col]);
 
-    do{
-        cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
-        cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) : ";
-        dest_row = controlled_input_integer();
-        cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-        dest_col = controlled_input_char();
-    }while(board.grid[dest_row-1][dest_col].color == white || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
+        do{
+            cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
+            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) : ";
+            dest_row = controlled_input_integer();
+            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            dest_col = controlled_input_char();
+        }while(board.grid[dest_row-1][dest_col].color == white || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
 
-    game_turn(white, dest_row-1, dest_col, piece_row-1, piece_col);
+        //virtual_game_turn(white, dest_row-1, dest_col, piece_row-1, piece_col);
+
+    }while(king_under_check(white));
     
+
+    game_turn(white, dest_row-1, dest_col, piece_row-1, piece_col);  
     if(board.grid[dest_row-1][dest_col].name == " pawn "){
         if(piece_row == 7){
             board.grid[dest_row-1][dest_col].moveset = special_moveset(1);
@@ -970,6 +1257,7 @@ int white_turn(){
             pawn_promotion(board.grid[piece_row][piece_col]);
         }
     }
+
     print_board(board.grid);
     board.turn = 1;
     return 1;
@@ -977,31 +1265,37 @@ int white_turn(){
 
 int black_turn(){
 
-    if(king_under_check(black)){
-        cout << " IL RE E' SOTTO SCACCO! DIFENDILO! " << endl;
-    }
-
     do{
-        cout << " <NERO> Inserisci il pezzo da spostare. \n";
-        cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
-        piece_row = controlled_input_integer();
-        if(piece_row == INVALID){
-            cout << " HA VINTO IL BIANCO PER FORFAIT! ";
-            return 0;
+
+        if(king_under_check(black)){
+            cout << " IL RE E' SOTTO SCACCO! " << endl;
         }
-        cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-        piece_col = controlled_input_char();
-    }while(board.grid[piece_row-1][piece_col].color != black);
 
-    print_board_with_moveset(board.grid[piece_row-1][piece_col]);
+        do{
+            cout << " <NERO> Inserisci il pezzo da spostare. \n";
+            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
+            piece_row = controlled_input_integer();
+            if(piece_row == INVALID){
+                cout << " HA VINTO IL BIANCO PER FORFAIT! ";
+                return 0;
+            }
+            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            piece_col = controlled_input_char();
+        }while(board.grid[piece_row-1][piece_col].color != black);
 
-    do{
-        cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
-        cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
-        dest_row = controlled_input_integer();
-        cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-        dest_col = controlled_input_char();
-    }while(board.grid[dest_row-1][dest_col].color == black || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
+        print_board_with_moveset(board.grid[piece_row-1][piece_col]);
+
+        do{
+            cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
+            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+            dest_row = controlled_input_integer();
+            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+            dest_col = controlled_input_char();
+        }while(board.grid[dest_row-1][dest_col].color == black || board.grid[dest_row-1][dest_col].name == " king " || !valid_move(dest_row-1, dest_col, board.grid[piece_row-1][piece_col]));
+
+        //virtual_game_turn(black, dest_row-1, dest_col, piece_row-1, piece_col);
+
+    }while(king_under_check(black));
 
     game_turn(black, dest_row-1, dest_col, piece_row-1, piece_col);
     if(board.grid[dest_row-1][dest_col].name == " pawn "){
