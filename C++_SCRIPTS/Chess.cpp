@@ -376,6 +376,31 @@ void init_board(){
 
 bool valid_move(int row, int col, Piece piece){
 
+    if(piece.name == " horse" || piece.name == "horse "){
+        if(piece.row > row && piece.col > col){
+            
+            if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)] && board.grid[row][col].color != piece.color){
+                return true;
+            }
+        }
+        if(piece.row < row && piece.col < col){
+            if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)] && board.grid[row][col].color != piece.color){
+                return true;
+            }
+        }
+        if(piece.row > row && piece.col < col){
+            if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)] && board.grid[row][col].color != piece.color){
+                return true;
+            }
+        }
+        if(piece.row < row && piece.col > col){
+            if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)] && board.grid[row][col].color != piece.color){
+                return true;
+            }  
+        }
+        return false;
+    }
+
     if(piece.name == " pawn "){
         // colonna verticale
         if(piece.col == col){
@@ -435,7 +460,7 @@ bool valid_move(int row, int col, Piece piece){
         }
         return false;
     }
-    
+
     // diagonale superiore sinistra
     if(piece.row > row && piece.col > col){
         if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
@@ -1212,7 +1237,7 @@ bool king_under_check(player_color color){
         }
     }
     
-    // Controllo per il cavallo
+    // Controllo per il cavallo [DA RIFARE]
     if(king_row > 0 && king_col > 0){
         if(king_row > 1){
             if(board.grid[king_row-2][king_col-1].color != color && board.grid[king_row-2][king_col-1].color != red){
@@ -1395,7 +1420,7 @@ int controlled_input_char(){
 /**
  ********************************** LOOP DI CONTROLLO PER I TURNI *******************************************************************************
  * 
- * (1) Controllo se il mio re è sotto scacco [OK]
+ * (1) Controllo se il mio re è sotto scacco [NOPE]
  * 
  * (2) <<INSERISCO LE COORDINATE DEL PEZZO DA SPOSTARE>> [OK]
  * 
@@ -1407,8 +1432,8 @@ int controlled_input_char(){
  *
  * (6) Se il re risulta ancora sotto scacco, RIPETO LOOP DAL PUNTO 1. [OK] 
  * 
- * (7) Controllo se sto facendo una promozione di pedina. [NOPE]
- *     <<SELEZIONO IL TIPO DI PEZZO A CUI PROMUOVERE LA PEDINA>> [NOPE]
+ * (7) Controllo se sto facendo una promozione di pedina. [OK]
+ *     <<SELEZIONO IL TIPO DI PEZZO A CUI PROMUOVERE LA PEDINA>> [OK]
  * 
  ************************* SE IL RE NON E' SOTTO SCACCO E LA MOSSA E' VALIDA SI ESCE DAL LOOP *************************************************
 */
