@@ -248,6 +248,12 @@ bool** special_moveset(int id){
                 }else{
                     moveset[row][col] = false;
                 }
+                /**
+                if(row == 7 && col == 8){
+                    moveset[row][col] = true;
+                }else{
+                    moveset[row][col] = false;
+                }*/
             }
         } 
         return moveset;
@@ -260,6 +266,13 @@ bool** special_moveset(int id){
                 }else{
                     moveset[row][col] = false;
                 }
+                /**
+               if(row == 9 && col == 8){
+                    moveset[row][col] = true;
+                }else{
+                    moveset[row][col] = false;
+                }
+                */
             }
         } 
         return moveset;
@@ -362,6 +375,66 @@ void init_board(){
 }
 
 bool valid_move(int row, int col, Piece piece){
+
+    if(piece.name == " pawn "){
+        // colonna verticale
+        if(piece.col == col){
+            // inferiore
+            if(piece.row < row){
+                if(piece.moveset[8 - (row - piece.row)][8]){
+                    for(int temp_row = piece.row+1; temp_row <= row; temp_row++){
+                        if(board.grid[temp_row][piece.col].color != red){
+                            return false;
+                        }
+                    }
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+            // superiore
+                if(piece.moveset[8 + (piece.row - row)][8]){
+                    for(int temp_row = piece.row-1; temp_row >= row; temp_row--){
+                        if(board.grid[temp_row][piece.col].color != red){
+                            return false;
+                        }
+                    }
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
+        if(piece.row > row && piece.col > col){
+            if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)] ){
+                if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
+                    return true;
+                }
+            }
+        }
+        if(piece.row < row && piece.col < col){
+            if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
+                if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
+                    return true;
+                }
+            }
+        }
+        if(piece.row > row && piece.col < col){
+            if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
+                if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
+                    return true;
+                }
+            }
+        }
+        if(piece.row < row && piece.col > col){
+            if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
+                if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
+                    return true;
+                }
+            }  
+        }
+        return false;
+    }
     
     // diagonale superiore sinistra
     if(piece.row > row && piece.col > col){
@@ -1179,17 +1252,75 @@ bool king_under_check(player_color color){
     return false;
 }
 
-void pawn_promotion(Piece piece){
+void pawn_promotion(){
+    int id = 0;
+    cout << "QUESTO PEZZO PUO' ESSERE PROMOSSO!" << endl;
+    cout << "SELEZIONA IL NUOVO PEZZO PER LA PROMOZIONE: \n(1) REGINA\n(2) TORRE\n(3) ALFIERE\n(4) CAVALLO\n";
+    cin >> id;
+    while (cin.fail() || id < 1 || id > 4)
+    {           
+        cin.clear(); // clear input buffer to restore cin to a usable state
+        cin.ignore(INT_MAX, '\n'); // ignore last input
+        cout << " Puoi solo inserire numeri interi da 1 a 4.\n";
+        cout << " Ritenta.\n";
+        cin >> id;
+    }
 
-    /**
-    piece.name = " new_piece ";
-    piece.moveset = moveset(x,y);
-    piece.moveset = special_moveset(id);
-    */
+    if(board.grid[dest_row][dest_col].color == white){
 
+        switch (id)
+        {
+        case 1:
+            board.grid[dest_row][dest_col].name = nameset(7,4);
+            board.grid[dest_row][dest_col].moveset = moveset(7,4);
+            break;
+        case 2:
+            board.grid[dest_row][dest_col].name = nameset(7,0);
+            board.grid[dest_row][dest_col].moveset = moveset(7,0);
+            break;
+        case 3:
+            board.grid[dest_row][dest_col].name = nameset(7,2);
+            board.grid[dest_row][dest_col].moveset = moveset(7,2);
+            break;
+        case 4:
+            board.grid[dest_row][dest_col].name = nameset(7,1);
+            board.grid[dest_row][dest_col].moveset = moveset(7,1);
+            break;    
+        default:
+            cout << "VALORE ERRATO\n";
+            break;
+        }
+
+    }else{
+
+        switch (id)
+        {
+        case 1:
+            board.grid[dest_row][dest_col].name = nameset(0,4);
+            board.grid[dest_row][dest_col].moveset = moveset(0,4);
+            break;
+        case 2:
+            board.grid[dest_row][dest_col].name = nameset(0,0);
+            board.grid[dest_row][dest_col].moveset = moveset(0,0);
+            break;
+        case 3:
+            board.grid[dest_row][dest_col].name = nameset(0,2);
+            board.grid[dest_row][dest_col].moveset = moveset(0,2);
+            break;
+        case 4:
+            board.grid[dest_row][dest_col].name = nameset(0,1);
+            board.grid[dest_row][dest_col].moveset = moveset(0,1);
+            break; 
+        default:
+            cout << "VALORE ERRATO\n";
+            break;
+        }
+    }
+    
 }
 
 bool checkmate(){
+    // work in progress
     return false;
 }
 
@@ -1200,7 +1331,6 @@ void virtual_game_turn(player_color color, int dest_row, int dest_col, int piece
 
 void game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
     
-    cls();
     make_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
     
 }
@@ -1209,7 +1339,10 @@ int controlled_input_integer(){
     int temp;
     cin >> temp;
     while (cin.fail() || temp < 1 || temp > 8)
-    {
+    {   
+        if(temp == INVALID){
+            return temp;
+        }
         cin.clear(); // clear input buffer to restore cin to a usable state
         cin.ignore(INT_MAX, '\n'); // ignore last input
         cout << " Puoi solo inserire numeri interi da 1 a 8.\n";
@@ -1312,17 +1445,16 @@ int white_turn(){
 
     }while(virtual_king_under_check(white));
 
-
     game_turn(white, dest_row, dest_col, piece_row, piece_col);  
     if(board.grid[dest_row][dest_col].name == " pawn "){
-        if(piece_row == 7){
+        if(piece_row == 6){
             board.grid[dest_row][dest_col].moveset = special_moveset(1);
         }
-        if(board.grid[piece_row][piece_col].color == white && dest_row == 0){
-            pawn_promotion(board.grid[piece_row][piece_col]);
+        if(dest_row == 0){
+            pawn_promotion();
         }
     }
-
+    cls();
     print_board(board.grid);
     board.turn = 1;
     return 1;
@@ -1364,17 +1496,15 @@ int black_turn(){
 
     game_turn(black, dest_row, dest_col, piece_row, piece_col);
     if(board.grid[dest_row][dest_col].name == " pawn "){
-
-        if(piece_row == 2){
+        if(piece_row == 1){
                 
             board.grid[dest_row][dest_col].moveset = special_moveset(0);
         }
-
-        if(board.grid[piece_row][piece_col].color == black && dest_row == 7){
-            pawn_promotion(board.grid[piece_row][piece_col]);
+        if(dest_row == 7){
+            pawn_promotion();
         }
-
     }
+    cls();
     print_board(board.grid);
     board.turn = 0;
     return 1;
