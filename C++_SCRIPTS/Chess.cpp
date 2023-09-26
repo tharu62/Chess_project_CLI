@@ -1280,7 +1280,7 @@ bool king_under_check(player_color color){
 void pawn_promotion(){
     int id = 0;
     cout << "QUESTO PEZZO PUO' ESSERE PROMOSSO!" << endl;
-    cout << "SELEZIONA IL NUOVO PEZZO PER LA PROMOZIONE: \n(1) REGINA\n(2) TORRE\n(3) ALFIERE\n(4) CAVALLO\n";
+    cout << "Seleziona il nuovo pezzo per la  promozione: \n(1) REGINA\n(2) TORRE\n(3) ALFIERE\n(4) CAVALLO\n";
     cin >> id;
     while (cin.fail() || id < 1 || id > 4)
     {           
@@ -1378,6 +1378,24 @@ int controlled_input_integer(){
     return temp;
 }
 
+int controlled_input_integer_2(){
+    int temp;
+    cin >> temp;
+    while (cin.fail() || temp < 1 || temp > 8)
+    {   
+        if(temp == -2){
+            return temp;
+        }
+        cin.clear(); // clear input buffer to restore cin to a usable state
+        cin.ignore(INT_MAX, '\n'); // ignore last input
+        cout << " Puoi solo inserire numeri interi da 1 a 8.\n";
+        cout << " Ritenta.\n";
+        cin >> temp;
+    }
+    temp = 8-temp;
+    return temp;
+}
+
 int controlled_input_char(){
     char temp;
     while(1){
@@ -1439,35 +1457,42 @@ int controlled_input_char(){
 */
 
 int white_turn(){
-
     do{
         if(king_under_check(white)){
             cout << " IL RE E' SOTTO SCACCO! " << endl;
         }
         do{
-            cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
-            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) ( -1 per forfait ) : ";
-            piece_row = controlled_input_integer();
-            if(piece_row == INVALID){
-                cout << " HA VINTO IL NERO PER FORFAIT! ";
-                return 0;
+            do{
+                cout << " <BIANCO> Inserisci il pezzo da spostare. \n";
+                cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) ( -1 per forfait ) : ";
+                piece_row = controlled_input_integer();
+                if(piece_row == INVALID){
+                    cout << " HA VINTO IL NERO PER FORFAIT! ";
+                    return 0;
+                }
+                cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+                piece_col = controlled_input_char();
+            }while(board.grid[piece_row][piece_col].color != white);
+
+            print_board_with_moveset(board.grid[piece_row][piece_col]);
+        
+            do{
+                cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
+                cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) ( -2 per selezionare nuovo pezzo da capo ): ";
+                dest_row = controlled_input_integer_2();
+                if(dest_row == -2){
+                    break;
+                }
+                cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+                dest_col = controlled_input_char();
+            }while(board.grid[dest_row][dest_col].color == white || board.grid[dest_row][dest_col].name == " king " || !valid_move(dest_row, dest_col, board.grid[piece_row][piece_col]));
+            
+            if(dest_row != -2){
+                virtual_game_turn(white, dest_row, dest_col, piece_row, piece_col);
             }
-            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            piece_col = controlled_input_char();
-        }while(board.grid[piece_row][piece_col].color != white);
 
-        print_board_with_moveset(board.grid[piece_row][piece_col]);
-
-        do{
-            cout << " <BIANCO> Inserisci la nuova posizione del pezzo da spostare. \n";
-            cout << " <BIANCO> Inserisci la RIGA ( NUMERO 1 -> 8 ) : ";
-            dest_row = controlled_input_integer();
-            cout << " <BIANCO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            dest_col = controlled_input_char();
-        }while(board.grid[dest_row][dest_col].color == white || board.grid[dest_row][dest_col].name == " king " || !valid_move(dest_row, dest_col, board.grid[piece_row][piece_col]));
-
-        virtual_game_turn(white, dest_row, dest_col, piece_row, piece_col);
-
+        }while(dest_row == -2);
+    
     }while(virtual_king_under_check(white));
 
     game_turn(white, dest_row, dest_col, piece_row, piece_col);  
@@ -1486,36 +1511,42 @@ int white_turn(){
 }
 
 int black_turn(){
-
     do{
 
         if(king_under_check(black)){
             cout << " IL RE E' SOTTO SCACCO! " << endl;
         }
-
         do{
-            cout << " <NERO> Inserisci il pezzo da spostare. \n";
-            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
-            piece_row = controlled_input_integer();
-            if(piece_row == INVALID){
-                cout << " HA VINTO IL BIANCO PER FORFAIT! ";
-                return 0;
+            do{
+                cout << " <NERO> Inserisci il pezzo da spostare. \n";
+                cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -1 per forfait ) : ";
+                piece_row = controlled_input_integer();
+                if(piece_row == INVALID){
+                    cout << " HA VINTO IL BIANCO PER FORFAIT! ";
+                    return 0;
+                }
+                cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+                piece_col = controlled_input_char();
+            }while(board.grid[piece_row][piece_col].color != black);
+
+            print_board_with_moveset(board.grid[piece_row][piece_col]);
+
+            do{
+                cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
+                cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+                dest_row = controlled_input_integer_2();
+                if(dest_row == -2){
+                    break;
+                }
+                cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
+                dest_col = controlled_input_char();
+            }while(board.grid[dest_row][dest_col].color == black || board.grid[dest_row][dest_col].name == " king " || !valid_move(dest_row, dest_col, board.grid[piece_row][piece_col]));
+            
+            if(dest_row != -2){
+                virtual_game_turn(black, dest_row, dest_col, piece_row, piece_col);
             }
-            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            piece_col = controlled_input_char();
-        }while(board.grid[piece_row][piece_col].color != black);
 
-        print_board_with_moveset(board.grid[piece_row][piece_col]);
-
-        do{
-            cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
-            cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
-            dest_row = controlled_input_integer();
-            cout << " <NERO> Inserisci la COLONNA ( CARATTERE A -> H ) : ";
-            dest_col = controlled_input_char();
-        }while(board.grid[dest_row][dest_col].color == black || board.grid[dest_row][dest_col].name == " king " || !valid_move(dest_row, dest_col, board.grid[piece_row][piece_col]));
-
-        virtual_game_turn(black, dest_row, dest_col, piece_row, piece_col);
+        }while(dest_row == -2);
 
     }while(virtual_king_under_check(black));
 
