@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdlib.h>
 #include <windows.h>
 #include <color.hpp>
 #include <climits>
@@ -23,17 +24,13 @@ class Board{
 };
 
 Board board;
-Board support_board;
+Board virtual_board;
 Piece player_1[16];
 Piece player_2[16];
 int piece_row = 0;
 int piece_col = 0;
 int dest_row = 0;
 int dest_col = 0;
-bool white_king_checked = false;
-bool black_king_checked = false;
-Piece king_cheking_piece[16];
-int n = 0;
 
 void pos(short C, short R)
 {
@@ -376,6 +373,10 @@ void init_board(){
 
 bool valid_move(int row, int col, Piece piece){
 
+    if(row == piece.row && col == piece.col){
+        return false;
+    }
+
     if(piece.name == " horse" || piece.name == "horse "){
         if(piece.row > row && piece.col > col){
             
@@ -618,20 +619,20 @@ bool valid_move(int row, int col, Piece piece){
 }
 
 void make_virtual_move(int row, int col, Piece piece){
-    if((support_board.turn == 1 && piece.color ==  white) || (support_board.turn == 0 && piece.color == black)){
+    if((virtual_board.turn == 1 && piece.color ==  white) || (virtual_board.turn == 0 && piece.color == black)){
         cout << "\nMOVE NOT VALID\n";
         return;
     }
     if(piece.row > row && piece.col > col){
 
         if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
-            support_board.grid[row][col].col = col;
-            support_board.grid[row][col].row = row;
-            support_board.grid[row][col].color = piece.color;
-            support_board.grid[row][col].moveset = piece.moveset;
-            support_board.grid[row][col].name = piece.name;
-            support_board.grid[piece.row][piece.col].name = " void ";
-            support_board.grid[piece.row][piece.col].color = red;
+            virtual_board.grid[row][col].col = col;
+            virtual_board.grid[row][col].row = row;
+            virtual_board.grid[row][col].color = piece.color;
+            virtual_board.grid[row][col].moveset = piece.moveset;
+            virtual_board.grid[row][col].name = piece.name;
+            virtual_board.grid[piece.row][piece.col].name = " void ";
+            virtual_board.grid[piece.row][piece.col].color = red;
         }else{
             cout << "\nMOVE NOT VALID\n";
         }
@@ -641,13 +642,13 @@ void make_virtual_move(int row, int col, Piece piece){
         if(piece.row > row){
 
             if(piece.moveset[8 + (piece.row - row)][8 - (col - piece.col)]){
-                support_board.grid[row][col].col = col;
-                support_board.grid[row][col].row = row;
-                support_board.grid[row][col].color = piece.color;
-                support_board.grid[row][col].moveset = piece.moveset;
-                support_board.grid[row][col].name = piece.name;
-                support_board.grid[piece.row][piece.col].name = " void ";
-                support_board.grid[piece.row][piece.col].color = red;
+                virtual_board.grid[row][col].col = col;
+                virtual_board.grid[row][col].row = row;
+                virtual_board.grid[row][col].color = piece.color;
+                virtual_board.grid[row][col].moveset = piece.moveset;
+                virtual_board.grid[row][col].name = piece.name;
+                virtual_board.grid[piece.row][piece.col].name = " void ";
+                virtual_board.grid[piece.row][piece.col].color = red;
             }else{
                 cout << "\nMOVE NOT VALID\n";
             }
@@ -657,13 +658,13 @@ void make_virtual_move(int row, int col, Piece piece){
             if(piece.col > col){
 
                 if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
-                    support_board.grid[row][col].col = col;
-                    support_board.grid[row][col].row = row;
-                    support_board.grid[row][col].color = piece.color;
-                    support_board.grid[row][col].moveset = piece.moveset;
-                    support_board.grid[row][col].name = piece.name;
-                    support_board.grid[piece.row][piece.col].name = " void ";
-                    support_board.grid[piece.row][piece.col].color = red;
+                    virtual_board.grid[row][col].col = col;
+                    virtual_board.grid[row][col].row = row;
+                    virtual_board.grid[row][col].color = piece.color;
+                    virtual_board.grid[row][col].moveset = piece.moveset;
+                    virtual_board.grid[row][col].name = piece.name;
+                    virtual_board.grid[piece.row][piece.col].name = " void ";
+                    virtual_board.grid[piece.row][piece.col].color = red;
                 }else{
                     cout << "\nMOVE NOT VALID\n";
                 }
@@ -671,13 +672,13 @@ void make_virtual_move(int row, int col, Piece piece){
             }else{
 
                 if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
-                    support_board.grid[row][col].col = col;
-                    support_board.grid[row][col].row = row;
-                    support_board.grid[row][col].color = piece.color;
-                    support_board.grid[row][col].moveset = piece.moveset;
-                    support_board.grid[row][col].name = piece.name;
-                    support_board.grid[piece.row][piece.col].name = " void ";
-                    support_board.grid[piece.row][piece.col].color = red;
+                    virtual_board.grid[row][col].col = col;
+                    virtual_board.grid[row][col].row = row;
+                    virtual_board.grid[row][col].color = piece.color;
+                    virtual_board.grid[row][col].moveset = piece.moveset;
+                    virtual_board.grid[row][col].name = piece.name;
+                    virtual_board.grid[piece.row][piece.col].name = " void ";
+                    virtual_board.grid[piece.row][piece.col].color = red;
                 }else{
                     cout << "\nMOVE NOT VALID\n";
                 }
@@ -874,11 +875,12 @@ void print_board_with_moveset(Piece piece){
 }
 
 bool virtual_king_under_check(player_color color){
-     int king_row = 0;
+    
+    int king_row = 0;
     int king_col = 0;
     for(king_row = 0; king_row < 8; king_row++){
         for(king_col = 0; king_col < 8; king_col++){
-            if(support_board.grid[king_row][king_col].name == " king " && support_board.grid[king_row][king_col].color == color){
+            if(virtual_board.grid[king_row][king_col].name == " king " && virtual_board.grid[king_row][king_col].color == color){
                 goto endFor;
             }
         }
@@ -922,11 +924,11 @@ bool virtual_king_under_check(player_color color){
     col = king_col-1;
     for(int row = king_row-1; row >= 0 && col >= 0; row--){
 
-        if(support_board.grid[row][col].color == color){
+        if(virtual_board.grid[row][col].color == color){
             break;
         }
-        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+        if(virtual_board.grid[row][col].color != color && virtual_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][col])){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -938,11 +940,11 @@ bool virtual_king_under_check(player_color color){
     col = king_col+1;
     for(int row = king_row-1; row >= 0 && col < 8; row--){
 
-        if(support_board.grid[row][col].color == color){
+        if(virtual_board.grid[row][col].color == color){
             break;
         }
-        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+        if(virtual_board.grid[row][col].color != color && virtual_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][col])){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -954,11 +956,11 @@ bool virtual_king_under_check(player_color color){
     col = king_col-1;
     for(int row = king_row+1; row < 8 && col >= 0; row++){
 
-        if(support_board.grid[row][col].color == color){
+        if(virtual_board.grid[row][col].color == color){
             break;
         }
-        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+        if(virtual_board.grid[row][col].color != color && virtual_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][col])){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -970,11 +972,11 @@ bool virtual_king_under_check(player_color color){
     col = king_col+1;
     for(int row = king_row+1; row < 8 && col < 8; row++){
 
-        if(support_board.grid[row][col].color == color){
+        if(virtual_board.grid[row][col].color == color){
             break;
         }
-        if(support_board.grid[row][col].color != color && support_board.grid[row][col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[row][col])){
+        if(virtual_board.grid[row][col].color != color && virtual_board.grid[row][col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][col])){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -984,11 +986,11 @@ bool virtual_king_under_check(player_color color){
     
     // Controllo colonna superiore.
     for(int row = king_row+1; row < 8; row++){
-        if(support_board.grid[row][king_col].color == color){
+        if(virtual_board.grid[row][king_col].color == color){
             break;
         }
-        if(support_board.grid[row][king_col].color != color && support_board.grid[row][king_col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[row][king_col])){
+        if(virtual_board.grid[row][king_col].color != color && virtual_board.grid[row][king_col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][king_col])){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -997,11 +999,11 @@ bool virtual_king_under_check(player_color color){
     
     // Controllo colonna inferiore.
     for(int row = king_row-1; row >= 0; row--){
-        if(support_board.grid[row][king_col].color == color){
+        if(virtual_board.grid[row][king_col].color == color){
             break;
         }
-        if(support_board.grid[row][king_col].color != color && support_board.grid[row][king_col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[row][king_col])){
+        if(virtual_board.grid[row][king_col].color != color && virtual_board.grid[row][king_col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][king_col])){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -1011,11 +1013,11 @@ bool virtual_king_under_check(player_color color){
     
     // Controllo riga destra.
     for(int col = king_col+1; col < 8; col++){
-        if(support_board.grid[king_row][col].color == color){
+        if(virtual_board.grid[king_row][col].color == color){
             break;
         }
-        if(support_board.grid[king_row][col].color != color && support_board.grid[king_row][col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[king_row][col])){
+        if(virtual_board.grid[king_row][col].color != color && virtual_board.grid[king_row][col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[king_row][col])){
                 //king_cheking_piece[n] = board.grid[king_row][col];
                 return true;
             }
@@ -1024,11 +1026,11 @@ bool virtual_king_under_check(player_color color){
 
     // Controllo riga sinistra.
     for(int col = king_col-1; col >= 0; col--){
-        if(support_board.grid[king_row][col].color == color){
+        if(virtual_board.grid[king_row][col].color == color){
             break;
         }
-        if(support_board.grid[king_row][col].color != color && support_board.grid[king_row][col].color != red){
-            if(valid_move(king_row, king_col, support_board.grid[king_row][col])){
+        if(virtual_board.grid[king_row][col].color != color && virtual_board.grid[king_row][col].color != red){
+            if(valid_move(king_row, king_col, virtual_board.grid[king_row][col])){
                 //king_cheking_piece[n] = board.grid[king_row][col];
                 return true;
             }
@@ -1038,16 +1040,16 @@ bool virtual_king_under_check(player_color color){
     // Controllo per il cavallo
     if(king_row > 0 && king_col > 0){
         if(king_row > 1){
-            if(support_board.grid[king_row-2][king_col-1].color != color && support_board.grid[king_row-2][king_col-1].color != red){
-                if(valid_move(king_row, king_col, support_board.grid[king_row-2][king_col-1])){
+            if(virtual_board.grid[king_row-2][king_col-1].color != color && virtual_board.grid[king_row-2][king_col-1].color != red){
+                if(valid_move(king_row, king_col, virtual_board.grid[king_row-2][king_col-1])){
                     //king_cheking_piece[n] = board.grid[king_row-2][king_col-1];
                     return true;
                 }
             }
         }
         if(king_col > 1){
-            if(support_board.grid[king_row-1][king_col-2].color != color && support_board.grid[king_row-1][king_col-2].color != red){
-                if(valid_move(king_row, king_col, support_board.grid[king_row-1][king_col-2])){
+            if(virtual_board.grid[king_row-1][king_col-2].color != color && virtual_board.grid[king_row-1][king_col-2].color != red){
+                if(valid_move(king_row, king_col, virtual_board.grid[king_row-1][king_col-2])){
                     //king_cheking_piece[n] = board.grid[king_row-1][king_col-2];
                     return true;
                 }
@@ -1056,16 +1058,16 @@ bool virtual_king_under_check(player_color color){
     }
     if(king_row < 7 && king_col < 7){
         if(king_row < 6){
-            if(support_board.grid[king_row+2][king_col+1].color != color && support_board.grid[king_row+2][king_col+1].color != red){
-                if(valid_move(king_row, king_col, support_board.grid[king_row+2][king_col+1])){
+            if(virtual_board.grid[king_row+2][king_col+1].color != color && virtual_board.grid[king_row+2][king_col+1].color != red){
+                if(valid_move(king_row, king_col, virtual_board.grid[king_row+2][king_col+1])){
                     //king_cheking_piece[n] = board.grid[king_row+2][king_col+1];
                     return true;
                 }
             }
         }
         if(king_col < 6){
-            if(support_board.grid[king_row+1][king_col+2].color != color && support_board.grid[king_row+1][king_col+2].color != red){
-                if(valid_move(king_row, king_col, support_board.grid[king_row-1][king_col-2])){
+            if(virtual_board.grid[king_row+1][king_col+2].color != color && virtual_board.grid[king_row+1][king_col+2].color != red){
+                if(valid_move(king_row, king_col, virtual_board.grid[king_row-1][king_col-2])){
                     //king_cheking_piece[n] = board.grid[king_row+1][king_col+2];
                     return true;
                 }
@@ -1344,20 +1346,49 @@ void pawn_promotion(){
     
 }
 
-bool checkmate(){
-    // work in progress
-    return false;
-}
-
 void virtual_game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
-    support_board = board;
+    virtual_board = board;
     make_virtual_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
 }
 
 void game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
-    
-    make_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
-    
+    make_move(dest_row, dest_col, board.grid[piece_row][piece_col]);   
+}
+
+bool checkmate(player_color color){
+
+    // work in progress
+    /********************************************* HO 4 CONDIZIONI PER LO SCACCO MATTO ************************************************************
+     *  1) il re è sotto scacco [già coperta prima della chiamata a funzione]
+     *  2) il re non può muoversi [nope]
+     *  3) nessun pezzo sulla scacchiera può coprire lo scacco [nope]
+     *     OPPURE
+     *     se un pezzo puo' coprire lo scacco, scopre un'altro scacco. [nope]
+     *  4) nessun pezzo sulla scachiera può mangiare il pezzo che sta attacando il re [nope]
+     *     OPPURE
+     *     se un pezzo può mangiare il pezzo che sta attacando il re, scopre uno scacco. [nope]
+    **********************************************************************************************************************************************/  
+
+    // METODO FORZA BRUTA -> per ogni pezzo controllo ogni possibile mossa.
+    for(int row = 0; row < 8; row++){
+        for(int col = 0; col < 8; col++){
+            if(board.grid[row][col].color == color){
+                for(int second_row = 0; second_row < 8; second_row++){
+                    for(int second_col = 0; second_col < 8; second_col++){
+                        if(valid_move(second_row, second_col, board.grid[row][col])){
+                            virtual_game_turn(color, second_row, second_col, row, col);
+                            //cout << row << " " << col << " " << << second_row << " " << << second_col << endl; 
+                            if(!virtual_king_under_check(color)){
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 int controlled_input_integer(){
@@ -1457,9 +1488,15 @@ int controlled_input_char(){
 */
 
 int white_turn(){
+
     do{
         if(king_under_check(white)){
-            cout << " IL RE E' SOTTO SCACCO! " << endl;
+            if(checkmate(white)){
+                cout << " SCACCO MATT0! HA VINTO IL NERO!" << endl;
+                exit(0);
+            }else{
+                cout << " IL RE E' SOTTO SCACCO! " << endl;
+            }
         }
         do{
             do{
@@ -1511,10 +1548,15 @@ int white_turn(){
 }
 
 int black_turn(){
-    do{
 
+    do{
         if(king_under_check(black)){
-            cout << " IL RE E' SOTTO SCACCO! " << endl;
+            if(checkmate(black)){
+                cout << " SCACCO MATT0! HA VINTO IL BIANCO!" << endl;
+                exit(0);
+            }else{
+                cout << " IL RE E' SOTTO SCACCO! " << endl;
+            }
         }
         do{
             do{
