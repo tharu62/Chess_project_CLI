@@ -31,6 +31,13 @@ int piece_row = 0;
 int piece_col = 0;
 int dest_row = 0;
 int dest_col = 0;
+bool en_passant = false;
+int en_passant_column = 0;
+int en_passant_row = 0;
+bool castle_black_R = true;
+bool castle_black_L = true;
+bool castle_white_R = true;
+bool castle_white_L = true;
 
 void pos(short C, short R)
 {
@@ -436,12 +443,30 @@ bool valid_move(int row, int col, Piece piece){
                 if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
                     return true;
                 }
+                // controllo en_passant
+                if(board.grid[row][col].color == red && en_passant && col == en_passant_column){
+                    if(piece.color == white && row == en_passant_row-1){
+                        return true;
+                    }
+                    if(piece.color == black && row == en_passant_row+1){
+                        return true;
+                    }
+                }
             }
         }
         if(piece.row < row && piece.col < col){
             if(piece.moveset[8 - (row - piece.row)][8 - (col - piece.col)]){
                 if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
                     return true;
+                }
+                // controllo en_passant
+                if(board.grid[row][col].color == red && en_passant && col == en_passant_column){
+                     if(piece.color == white && row == en_passant_row-1){
+                        return true;
+                    }
+                    if(piece.color == black && row == en_passant_row+1){
+                        return true;
+                    }
                 }
             }
         }
@@ -450,12 +475,30 @@ bool valid_move(int row, int col, Piece piece){
                 if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
                     return true;
                 }
+                // controllo en_passant
+                if(board.grid[row][col].color == red && en_passant && col == en_passant_column){
+                    if(piece.color == white && row == en_passant_row-1){
+                        return true;
+                    }
+                    if(piece.color == black && row == en_passant_row+1){
+                        return true;
+                    }
+                }
             }
         }
         if(piece.row < row && piece.col > col){
             if(piece.moveset[8 - (row - piece.row)][8 + (piece.col - col)]){
                 if(board.grid[row][col].color != red && board.grid[row][col].color != piece.color){
                     return true;
+                }
+                // controllo en_passant
+                if(board.grid[row][col].color == red && en_passant && col == en_passant_column){
+                    if(piece.color == white && row == en_passant_row-1){
+                        return true;
+                    }
+                    if(piece.color == black && row == en_passant_row+1){
+                        return true;
+                    }
                 }
             }  
         }
@@ -619,10 +662,12 @@ bool valid_move(int row, int col, Piece piece){
 }
 
 void make_virtual_move(int row, int col, Piece piece){
+
     if((virtual_board.turn == 1 && piece.color ==  white) || (virtual_board.turn == 0 && piece.color == black)){
         cout << "\nMOVE NOT VALID\n";
         return;
     }
+
     if(piece.row > row && piece.col > col){
 
         if(piece.moveset[8 + (piece.row - row)][8 + (piece.col - col)]){
@@ -691,6 +736,52 @@ void make_virtual_move(int row, int col, Piece piece){
 }
 
 void make_move(int row, int col, Piece piece){
+
+    if(en_passant){
+
+        if(piece.name == " pawn "){
+            switch (piece.color)
+            {
+            case white:
+                if(row == en_passant_row-1 && col == en_passant_column){
+                    board.grid[en_passant_row][en_passant_column].color = red;
+                }
+                break;
+            case black:
+                if(row == en_passant_row+1 && col == en_passant_column){
+                    board.grid[en_passant_row][en_passant_column].color = red;
+                }
+                break;    
+            
+            default:
+                break;
+            }
+
+        }
+        en_passant = false;
+    }
+
+    if(piece.name == " pawn "){    
+        switch(piece.color){
+            case white:
+                if(piece.row == 6 && row == 4){
+                    en_passant = true;
+                    en_passant_column = col;
+                    en_passant_row = row;
+                }
+                break;
+            case black:
+                if(piece.row == 1 && row == 3){
+                    en_passant = true;
+                    en_passant_column = col;
+                    en_passant_row = row;
+                }
+                break;
+
+            default:
+                break;     
+        }
+    }
 
     if((board.turn == 1 && piece.color ==  white) || (board.turn == 0 && piece.color == black)){
         cout << "\nMOVE NOT VALID\n";
@@ -1346,6 +1437,10 @@ void pawn_promotion(){
     
 }
 
+void clastle(){
+    // work in progress.
+}
+
 void virtual_game_turn(player_color color, int dest_row, int dest_col, int piece_row, int piece_col){
     virtual_board = board;
     make_virtual_move(dest_row, dest_col, board.grid[piece_row][piece_col]);
@@ -1541,7 +1636,7 @@ int white_turn(){
             pawn_promotion();
         }
     }
-    cls();
+    //cls();
     print_board(board.grid);
     board.turn = 1;
     return 1;
@@ -1575,7 +1670,7 @@ int black_turn(){
 
             do{
                 cout << " <NERO> Inserisci la nuova posizione del pezzo da spostare. \n";
-                cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) : ";
+                cout << " <NERO> Inserisci la RIGA ( NUMERO 0 -> 7 ) ( -2 per selezionare nuovo pezzo da capo ): ";
                 dest_row = controlled_input_integer_2();
                 if(dest_row == -2){
                     break;
@@ -1602,7 +1697,7 @@ int black_turn(){
             pawn_promotion();
         }
     }
-    cls();
+    //cls();
     print_board(board.grid);
     board.turn = 0;
     return 1;
