@@ -15,6 +15,7 @@ class Piece{
         int row;
         int col;
         bool** moveset;
+        bool** attackset;
 };
 
 class Board{
@@ -146,22 +147,8 @@ bool** moveset(int row, int col){
             } 
             return moveset;    
 
-        // RE
-        case 3:
-            
-            for(int row = 0; row < 17; row++){
-                for(int col = 0; col < 17; col++){
-                    if((row > 6 && row < 10) && (col > 6 && col < 10)){
-                        moveset[row][col] = true;
-                    }else{
-                        moveset[row][col] = false;
-                    }
-                }
-            } 
-            return moveset;
-
         // REGINA
-        case 4:
+        case 3:
             
             for(int row = 0; row < 17; row++){
                 for(int col = 0; col < 17; col++){
@@ -179,6 +166,20 @@ bool** moveset(int row, int col){
                             }
 
                         }
+                    }
+                }
+            } 
+            return moveset;
+
+        // RE
+        case 4:
+            
+            for(int row = 0; row < 17; row++){
+                for(int col = 0; col < 17; col++){
+                    if((row > 6 && row < 10) && (col > 6 && col < 10)){
+                        moveset[row][col] = true;
+                    }else{
+                        moveset[row][col] = false;
                     }
                 }
             } 
@@ -306,11 +307,11 @@ string nameset(int row, int col){
 
         case 3:
 
-            return " king ";
+            return " queen";
         
         case 4:
 
-            return "queen ";
+            return " king ";
 
         case 5:
 
@@ -344,7 +345,7 @@ string special_nameset(int id){
     switch (id)
     {
     case 0:
-        return " goku ";
+        return " bird ";
     
     default:
         return "pingu ";
@@ -1081,7 +1082,7 @@ bool virtual_king_under_check(player_color color){
             break;
         }
         if(virtual_board.grid[row][king_col].color != color && virtual_board.grid[row][king_col].color != red){
-            if(valid_move(king_row, king_col, virtual_board.grid[row][king_col])){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][king_col]) && board.grid[row][king_col].name != " pawn "){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -1094,7 +1095,7 @@ bool virtual_king_under_check(player_color color){
             break;
         }
         if(virtual_board.grid[row][king_col].color != color && virtual_board.grid[row][king_col].color != red){
-            if(valid_move(king_row, king_col, virtual_board.grid[row][king_col])){
+            if(valid_move(king_row, king_col, virtual_board.grid[row][king_col]) && board.grid[row][king_col].name != " pawn "){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -1284,7 +1285,7 @@ bool king_under_check(player_color color){
             break;
         }
         if(board.grid[row][king_col].color != color && board.grid[row][king_col].color != red){
-            if(valid_move(king_row, king_col, board.grid[row][king_col])){
+            if(valid_move(king_row, king_col, board.grid[row][king_col]) && board.grid[row][king_col].name != " pawn "){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
@@ -1297,7 +1298,7 @@ bool king_under_check(player_color color){
             break;
         }
         if(board.grid[row][king_col].color != color && board.grid[row][king_col].color != red){
-            if(valid_move(king_row, king_col, board.grid[row][king_col])){
+            if(valid_move(king_row, king_col, board.grid[row][king_col]) && board.grid[row][king_col].name != " pawn "){
                 //king_cheking_piece[n] = board.grid[row][king_col];
                 return true;
             }
