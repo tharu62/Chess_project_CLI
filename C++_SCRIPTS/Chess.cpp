@@ -1112,6 +1112,46 @@ void make_virtual_move(int row, int col, Piece piece){
 
 void make_move(int row, int col, Piece piece){
 
+    if(piece.name == " rook "){
+        switch (piece.color)
+        {
+        case white:
+            if(col == 0 && castle_white_L){
+                castle_white_L = false;
+            }
+            if(col == 7 && castle_white_R){
+                castle_white_R = false;
+            }
+            break;
+        case black:
+            if(col == 0 && castle_black_L){
+                castle_black_L = false;
+            }
+            if(col == 7 && castle_white_R){
+                castle_black_R = false;
+            }
+            break;    
+        default:
+            break;
+        }
+    }
+
+    if(piece.name == " king "){
+        switch (piece.color)
+        {
+        case white:
+            castle_white_L = false;
+            castle_white_R = false;
+            break;
+        case black:
+            castle_black_L = false;
+            castle_black_R = false;
+            break;
+        default:
+            break;
+        }
+    }
+
     if(en_passant){
 
         if(piece.name == " pawn "){
@@ -1300,6 +1340,93 @@ void pawn_promotion(){
         }
     }
     
+}
+
+bool castle_possible(player_color color, int col){
+    
+    switch (color)
+    {
+    case white:
+
+        switch (col)
+        {
+        case 2:
+            for(int temp_col = 1; temp_col < 4; temp_col++){
+                if(board.grid[7][temp_col].color != red){
+                    return false;
+                }
+            }
+            for(int temp_col = 1; temp_col < 4; temp_col++){
+                for(int r = 0; r < 8; r++){
+                    for(int c = 0; c < 8; c++){
+                        if(board.grid[r][c].color != color && board.grid[r][c].color != red && valid_attack(7,temp_col,board.grid[r][c])){
+                            return false;
+                        }
+                    }
+                }
+            }
+            break;
+        case 6:
+            for(int temp_col = 5; temp_col < 7; temp_col++){
+                if(board.grid[7][temp_col].color != red){
+                    return false;
+                }
+            }
+            for(int temp_col = 5; temp_col < 7; temp_col++){
+                for(int r = 0; r < 8; r++){
+                    for(int c = 0; c < 8; c++){
+                        if(board.grid[r][c].color != color && board.grid[r][c].color != red && valid_attack(7,temp_col,board.grid[r][c])){
+                            return false;
+                        }
+                    }
+                }
+            }
+            break;    
+        }
+        break;
+
+    case black:
+
+        switch (col)
+        {
+        case 2:
+            for(int temp_col = 1; temp_col < 4; temp_col++){
+                if(board.grid[0][temp_col].color != red){
+                    return false;
+                }
+            }
+            for(int temp_col = 1; temp_col < 4; temp_col++){
+                for(int r = 0; r < 8; r++){
+                    for(int c = 0; c < 8; c++){
+                        if(board.grid[r][c].color != color && board.grid[r][c].color != red && valid_attack(0,temp_col,board.grid[r][c])){
+                            return false;
+                        }
+                    }
+                }
+            }
+            break;
+        case 6:
+            for(int temp_col = 5; temp_col < 7; temp_col++){
+                if(board.grid[0][temp_col].color != red){
+                    return false;
+                }
+            }
+            for(int temp_col = 5; temp_col < 7; temp_col++){
+                for(int r = 0; r < 8; r++){
+                    for(int c = 0; c < 8; c++){
+                        if(board.grid[r][c].color != color && board.grid[r][c].color != red && valid_attack(0,temp_col,board.grid[r][c])){
+                            return false;
+                        }
+                    }
+                }
+            }
+            break;    
+        }
+        break;    
+    
+    }
+
+    return true;
 }
 
 bool virtual_king_under_check(player_color color){
