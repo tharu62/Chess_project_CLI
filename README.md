@@ -9,7 +9,7 @@ LISTA DEGLI ESEGUIBILI E SOURCE FILE:
       - CLI [completa e stabile su Windows]
         (Richiede di scaricare la libreiria aggiutiva color.hpp già presente nella repository)
       - GUI [work in porgress]
-        (Nessuna realese funzionatnte per ora)
+        (Nessuna release funzionante per ora)
 
 (2) ...
         
