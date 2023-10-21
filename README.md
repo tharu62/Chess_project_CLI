@@ -5,11 +5,10 @@ I implemented all and only the Official chess rules (en passant and castling inc
 The game is available in two different versions:
     
     (1) Chess_Project_CLI
-        It is the game version that is usable only on terminal. 
+        this version is playable only on terminal. 
+        (some terminal may not support the colored texts... I have no idea how to fix it, i advice to change the code where i implement the color.hpp library -> all printing functions)
 
     (2) Chess_project_GUI (WORK IN PROGRESS...)
-        It is the game version that is usable only on display.
-        This version uses the ImGui game engine.
+        this version is playable only on display using the ImGui game engine.
 
 Both version are programmed in C++ and you can find all the scripts and the external libraries used inside the respective folder.
-I hope you like my games!
