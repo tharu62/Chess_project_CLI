@@ -9,6 +9,6 @@ The game is available in two different versions:
         (some terminal may not support the colored texts... I have no idea how to fix it, i advice to change the code where i implement the color.hpp library -> all printing functions)
 
     (2) Chess_project_GUI (WORK IN PROGRESS...)
-        this version is playable only on display using the ImGui game engine.
+        this version is playable only on display using the SDL2 game engine.
 
 Both version are programmed in C++ and you can find all the scripts and the external libraries used inside the respective folder.
