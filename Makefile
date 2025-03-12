@@ -1,15 +1,18 @@
-.DEFAULT_GOAL := Chess.cpp
+# .DEFAULT_GOAL := Chess.cpp
+CXX=g++
+CFLAGS=-Wall -c++11
+LDFLAGS= -Iinclude -LC:\Users\SriLi\Documents\C++\Chess_project_CLI\include
 
-all: clean test
+SRC_F=src
+BUILD_F=build
 
-Chess.cpp
-	gcc -o ./target/Chess.out ./src/Chess.cpp 
+default: chess.exe run
 
-run: Chess.cpp
-	./target/Chess.out
+chess.exe: chess.o
+	g++ $(BUILD_F)/chess.o $(LDFLAGS) -o $(BUILD_F)/chess.exe
 
-test: Chess.cpp
-	./target/Chess.out
+chess.o:
+	g++ -c $(SRC_F)/chess.cpp $(LDFLAGS) -o $(BUILD_F)/chess.o
 
-clean: 
-	rm -rf ./target/*.out
+run: chess.exe
+	./build/chess.exe

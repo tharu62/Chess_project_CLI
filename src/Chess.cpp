@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <windows.h>
-#include <color.hpp>
 #include <climits>
+#include <color.hpp>
 #define INVALID -1
 using namespace std;
 
