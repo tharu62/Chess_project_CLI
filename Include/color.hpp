@@ -1,5 +1,5 @@
 #if 0
-Copyright <2018> <Feng Wang>
+Copyright <2018> <Feng Wang> .
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
