@@ -1,3 +1,6 @@
-/.dist
-/.vs
-/.vscode
+/.gitignore
+.vscode
+.gitignore
+Makefile
+CMakeLists.txt
+build/
