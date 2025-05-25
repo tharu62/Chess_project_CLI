@@ -1,7 +1,7 @@
 # .DEFAULT_GOAL := Chess.cpp
 CXX=g++
 CFLAGS=-Wall -c++11
-LDFLAGS= -Iinclude -LC:\Users\SriLi\Documents\C++\Chess_project_CLI\include
+LDFLAGS= -Iinclude -LC:$(HOME)\Documents\C++\Chess_project_CLI\include
 
 SRC_F=src
 BUILD_F=build
